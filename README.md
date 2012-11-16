@@ -1,6 +1,6 @@
 # Datanet::Skel
 
-TODO: Write a gem description
+Datanet skeleton for datanet models.
 
 ## Installation
 
