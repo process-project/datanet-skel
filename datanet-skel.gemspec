@@ -8,12 +8,19 @@ Gem::Specification.new do |gem|
   gem.version       = Datanet::Skel::VERSION
   gem.authors       = ["Marek Kasztelnik"]
   gem.email         = ["mkasztelnik@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
-  gem.homepage      = ""
+  gem.summary       = %q{REST interface for datanet models.}
+  gem.description   = %q{Skeleton for datanet models.}
+  gem.homepage      = "https://github.com/dice-cyfronet/datanet-skel"
 
   gem.files         = `git ls-files`.split($/)
   gem.executables   = gem.files.grep(%r{^bin/}).map{ |f| File.basename(f) }
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
-  gem.require_paths = ["lib"]
+  gem.require_paths = ["lib", "api"]
+
+  gem.add_runtime_dependency 'grape' 
+  gem.add_runtime_dependency 'sinatra' 
+  gem.add_runtime_dependency 'json' 
+  gem.add_runtime_dependency 'json-schema' 
+
+  #gem.add_development_dependency
 end
