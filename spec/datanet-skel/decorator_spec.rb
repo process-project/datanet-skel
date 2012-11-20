@@ -1,0 +1,156 @@
+require 'spec_helper'
+require 'datanet-skel/exceptions'
+
+describe Datanet::Skel::MapperDecorator do
+
+	def mapper
+		@mapper ||= mock(Datanet::Skel::MapperMock)
+	end
+
+	def app
+		app = Datanet::Skel::MapperDecorator.new mapper
+		app.model_location = @model_location
+		app
+	end
+
+	describe 'collections method' do
+		it 'lists registered collections' do
+			@model_location = models_dir
+
+			app.collections.should == ['address', 'user']
+		end
+
+		it 'raises exception while model directory does not exist' do
+			@model_location = '/non/existing/location'
+
+			expect {
+			 	app.collections
+			}.to raise_error(Datanet::Skel::WrongModelLocationError, 'Wrong models directory location')
+		end
+
+		it 'throws exception while collections directory does not contains schemas' do
+			@model_location = empty_models_dir
+
+			expect {
+			 	app.collections
+			}.to raise_error(Datanet::Skel::WrongModelLocationError, 'No models in selected models directory')
+		end
+	end
+
+	describe 'collection method' do
+		it 'get existing collection' do
+			@model_location = models_dir
+			mapper.should_receive(:collection).with(any_args())
+			  	.and_return(Object.new)
+
+			app.collection('user').should be_an_instance_of(Datanet::Skel::EntityDecorator)
+		end
+
+		it 'throws exception while getting non existing collection' do
+			@model_location = models_dir
+
+			expect {
+				app.collection('not_existing')
+			}.to raise_error(Datanet::Skel::CollectionNotFoundException, 'Entity not_existing not found')
+		end
+	end
+end
+
+describe Datanet::Skel::EntityDecorator do
+
+	def entity
+		@entity ||= mock(Datanet::Skel::CollectionMock)
+	end
+
+	def app model_name
+		Datanet::Skel::EntityDecorator.new entity, model_path(model_name)
+	end
+
+	describe 'add entity' do
+		it 'adds new entity when json is valid according to give schema' do
+			new_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
+			new_user_id = '1234'
+
+			entity.should_receive(:add).with(new_user).and_return(new_user_id)
+
+			app('user').add(new_user).should == new_user_id
+		end
+
+		it 'throws exception when json is not valid according to given schema' do
+			not_valid_user = {'first_name' => 'marek', 'age' => 31, 'other' => 'something else'}
+
+			expect {
+				app('user').add(not_valid_user)
+			}.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
+		end
+	end
+
+	describe 'replace entity' do
+		it 'replaces valid json document' do
+			updated_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
+			user_id = '1234'
+
+			entity.should_receive(:replace).with(user_id, updated_user)
+
+			app('user').replace(user_id, updated_user)
+		end
+
+		it 'throws exception when replace json is not valid' do
+			not_valid_updated_user = {'first_name' => 'marek', 'age' => 31, 'other' => 'something else'}
+			user_id = '1234'
+
+			expect {
+				app('user').replace(user_id, not_valid_updated_user)
+			}.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
+		end
+
+		it 'throws exception while entity not found exception' do
+			updated_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
+			non_existing_id = '1235'
+
+			entity.should_receive(:replace).with(non_existing_id, updated_user)
+				.and_raise(Datanet::Skel::EntityNotFoundException.new)
+
+			expect {
+				app('user').replace(non_existing_id, updated_user)
+			}.to raise_error(Datanet::Skel::EntityNotFoundException)
+		end
+	end
+
+	describe 'update entity' do
+		it 'replaces entity with valid values' do
+			updated_values = {'first_name' => 'Marek', 'another' => 'value'}
+			user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31}
+			user_id = '1234'
+
+			entity.should_receive(:get).with(user_id).and_return(user)
+			entity.should_receive(:update).with(user_id, updated_values)
+
+			app('user').update(user_id, updated_values)
+		end
+
+		it 'throws exception while nulling required fields' do
+			wrong_updated_values = {'first_name' => nil, 'another' => 'value'}
+			user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31}
+			user_id = '1234'
+
+			entity.should_receive(:get).with(user_id).and_return(user)
+
+			expect {
+				app('user').update(user_id, wrong_updated_values)				
+			}.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
+		end
+	end
+end
+
+def empty_models_dir
+	File.join(File.dirname(__FILE__), '..', 'resources')
+end
+
+def models_dir
+	File.join(File.dirname(__FILE__), '..', 'resources', 'models')
+end
+
+def model_path(model_name)
+	File.join(models_dir, "#{model_name}.json")
+end

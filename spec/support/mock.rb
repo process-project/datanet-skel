@@ -4,11 +4,15 @@ module Datanet
 			def collections
 			end
 
-			def collection(entity_type)
+			def collection(entity_type)				
 			end
 		end
 
 		class CollectionMock
+			def initialize obj
+
+			end
+
 			def ids
 			end
 

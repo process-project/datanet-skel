@@ -1,0 +1,8 @@
+{
+	"type": "object",
+	"properties": {
+		"first_name": {"type": "string", "required": true},
+		"last_name" : {"type": "string", "required": true},
+		"age"       : {"type": "integer", "required": true}
+	}
+}
