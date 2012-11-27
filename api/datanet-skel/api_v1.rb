@@ -65,8 +65,12 @@ module Datanet
       	params do
       		requires :collection_name, :desc => 'Collection name'
       	end
-      	get ":collection_name" do
-      		collection.ids or []        
+      	get ":collection_name" do          
+          if request.params.size > 0 then 
+            collection.search(request.params)
+          else
+      		  collection.ids or []        
+          end
       	end
 
       	desc "Add new entity"
@@ -77,6 +81,14 @@ module Datanet
       		logger.debug "Adding new entity into '#{params[:collection_name]}' collection"                
       		collection.add doc!
       	end
+
+        desc "Get entity schema"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+        end
+        get ':collection_name/schema' do
+          collection.schema
+        end
 
       	desc "Get entity with given id"
       	params do
@@ -116,7 +128,7 @@ module Datanet
       	put ":collection_name/:id" do
       		collection.replace id, doc!
       		nil
-      	end
+      	end      
       end    
     end
   end

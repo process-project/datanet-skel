@@ -63,6 +63,10 @@ module Datanet
 				super
 			end
 
+			def schema
+				JSON.parse(File.read(@model_path))
+			end
+
 		private 
 
 			def valid!(json_doc)

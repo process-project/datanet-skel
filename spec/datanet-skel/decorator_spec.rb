@@ -141,6 +141,15 @@ describe Datanet::Skel::EntityDecorator do
 			}.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
 		end
 	end
+
+	describe 'schema' do
+		it 'gets schema content as json object' do
+			@model_location = models_dir
+			schema_content = File.read(File.join(@model_location, 'user.json'))
+			user_schema = JSON.parse(schema_content)
+			app('user').schema.should == user_schema
+		end
+	end
 end
 
 def empty_models_dir
