@@ -19,41 +19,41 @@ module Datanet
         Rack::Response.new([e.message], 422)
       end
 
-  		helpers do
-  			def mapper
-  				API.mapper
-  			end
+      helpers do
+        def mapper
+        	API.mapper
+        end
 
-  			def doc!
+        def doc!
         	doc = env['rack.request.form_hash']
-    		end    		
+        end    		
 
-    		def collection
-    			mapper.collection(params[:collection_name])
-    		end
+        def collection
+        	mapper.collection(params[:collection_name])
+        end
 
-    		def entity!
-    			collection.get id
-    		end
+        def entity!
+        	collection.get id
+        end
 
-    		def id
-    			params[:id]
-    		end
+        def id
+        	params[:id]
+        end
 
-    		def logger
-      		API.logger
-    		end
+        def logger
+        	API.logger
+        end
 
-    		def halt_on_empty!(obj, status, message)
-      		if obj.nil?        
+        def halt_on_empty!(obj, status, message)
+        	if obj.nil?        
         		halt status, message
-      		else
+        	else
         		obj
-      		end
-    		end
+        	end
+        end
   		end
 
-  		desc "List registered collections names"
+      desc "List registered collections names"
       get :list do
       	mapper.collections or []      
       end		
