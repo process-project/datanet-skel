@@ -1,6 +1,4 @@
-# Datanet::Skel 
-
-![build status](http://dev.cyfronet.pl/gitlab-ci/projects/1/status?ref=master)
+# Datanet::Skel [![build status](http://dev.cyfronet.pl/gitlab-ci/projects/1/status?ref=master)]
 
 Datanet skeleton for datanet models.
 
