@@ -20,12 +20,12 @@ describe Datanet::Skel::API_v1 do
 		Datanet::Skel::API.mapper = @mapper		
 	end	
 
-	describe 'GET /list' do
+	describe 'GET /' do
 		it 'lists collections names' do		
 			collections = ['a', 'b', 'c']
 			@mapper.should_receive(:collections).and_return(collections)
 			
-			get 'list', nil, headers
+			get '/', nil, headers
 			last_response.status.should == be_ok		
 			JSON.parse(last_response.body).should == collections
 		end
@@ -33,18 +33,18 @@ describe Datanet::Skel::API_v1 do
 		it 'lists empty collections names' do
 			@mapper.should_receive(:collections).and_return(nil)
 			
-			get 'list', nil, headers
+			get '/', nil, headers
 			last_response.status.should == be_ok		
 			JSON.parse(last_response.body).should == []		
 		end
 	end
 
-	describe 'GET /entity/:collection_name' do
+	describe 'GET :collection_name' do
 		it 'gets non existing collection' do
 			@mapper.should_receive(:collection).with('non_existing')
 				.and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
-			get 'entity/non_existing', nil, headers
+			get 'non_existing', nil, headers
 			last_response.status.should == 404
 		end
 
@@ -52,7 +52,7 @@ describe Datanet::Skel::API_v1 do
 			ids = ['1', '2', '3']
 			@user_collection.should_receive(:ids).and_return(ids)		
 					
-			get 'entity/user', nil, headers
+			get 'user', nil, headers
 			last_response.status.should == 200
 			JSON.parse(last_response.body).should == ids		
 		end
@@ -60,18 +60,18 @@ describe Datanet::Skel::API_v1 do
 		it 'gets empty user collection entities ids' do
 			@user_collection.should_receive(:ids).and_return(nil)		
 					
-			get 'entity/user', nil, headers
+			get 'user', nil, headers
 			last_response.status.should == 200
 			JSON.parse(last_response.body).should == []
 		end
 	end
 
-	describe "GET /entity/:collection_name?search=value" do
+	describe "GET /:collection_name?search=value" do
 		it 'gets entities ids using single query element' do
 			ids = ['1', '2']
 			@user_collection.should_receive(:search).with({"name" => "marek"}).and_return(ids)
 
-			get 'entity/user?name=marek', nil, headers
+			get 'user?name=marek', nil, headers
 			last_response.status.should == 200
 			JSON.parse(last_response.body).should == ids		
 		end
@@ -81,18 +81,18 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:search)
 				.with({"name" => "marek", "age" => "31"}).and_return(ids)
 
-			get 'entity/user?name=marek&age=31', nil, headers
+			get 'user?name=marek&age=31', nil, headers
 			last_response.status.should == 200
 			JSON.parse(last_response.body).should == ids		
 		end
 	end
 
-	describe 'POST /entity/:collection_name' do
+	describe 'POST /:collection_name' do
 		it 'adds valid entity into user collection' do
 			new_user = {'first_name' => 'marek', 'age' => 31}
 			@user_collection.should_receive(:add).with(new_user).and_return(user_id)
 
-			post 'entity/user', new_user.to_json, headers
+			post 'user', new_user.to_json, headers
 			last_response.status.should == 201
 			last_response.body.should == user_id
 		end
@@ -102,18 +102,18 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:add).with(new_user)
 				.and_raise(Datanet::Skel::ValidationError.new)
 
-			post 'entity/user', new_user.to_json, headers
+			post 'user', new_user.to_json, headers
 			last_response.status.should == 422
 			# TODO check validation error message
 		end
 	end
 
-	describe 'GET /entity/:collection_name/:id' do
+	describe 'GET /:collection_name/:id' do
 		it 'gets existing user entity' do
 			user = {'first_name' => 'marek', 'age' => 31}
 			@user_collection.should_receive(:get).with(user_id).and_return(user)
 
-			get "entity/user/#{user_id}", nil, headers
+			get "user/#{user_id}", nil, headers
 			last_response.status.should == be_ok
 			JSON.parse(last_response.body).should == user
 		end
@@ -122,16 +122,16 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:get).with(user_id)
 				.and_raise(entity_not_found_error(user_id))
 
-			get "entity/user/#{user_id}", nil, headers
+			get "user/#{user_id}", nil, headers
 			entity_not_found?(user_id)
 		end
 	end
 
-	describe 'DELETE /entity/:collection_name/:id' do
+	describe 'DELETE /:collection_name/:id' do
 		it 'deletes existing user entity' do
 			@user_collection.should_receive(:remove).with(user_id)
 
-			delete "entity/user/#{user_id}", nil, headers
+			delete "user/#{user_id}", nil, headers
 			last_response.status.should == be_ok
 		end
 
@@ -139,17 +139,17 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:remove).with(user_id)
 				.and_raise(entity_not_found_error(user_id))
 
-			delete "entity/user/#{user_id}", nil, headers
+			delete "user/#{user_id}", nil, headers
 			entity_not_found?(user_id)
 		end
 	end
 
-	describe 'POST /entity/:collection_name/:id' do
+	describe 'POST /:collection_name/:id' do
 		it 'updates existing user entity' do
 			update = {'first_name' => 'Marek'}
 			@user_collection.should_receive(:update).with(user_id, update)
 
-			post "entity/user/#{user_id}", update.to_json, headers
+			post "user/#{user_id}", update.to_json, headers
 			last_response.status.should == be_ok
 		end
 
@@ -158,7 +158,7 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:update).with(user_id, doc)
 				.and_raise(entity_not_found_error(user_id))
 
-			post "entity/user/#{user_id}", doc.to_json, headers
+			post "user/#{user_id}", doc.to_json, headers
 			entity_not_found?(user_id)
 		end
 
@@ -167,19 +167,19 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:update).with(user_id, mandatory_parameter_set_to_nil)
 				.and_raise(Datanet::Skel::ValidationError.new)			
 
-			post "entity/user/#{user_id}", mandatory_parameter_set_to_nil.to_json, headers
+			post "user/#{user_id}", mandatory_parameter_set_to_nil.to_json, headers
 			last_response.status.should == 422
 			# TODO check validation error message
 		end
 	end
 
-	describe 'PUT /entity/:collection_name/:id' do
+	describe 'PUT /:collection_name/:id' do
 		it 'overwites existing user entity' do
 			updated_user = {'first_name' => 'marek', 'age' => 31}
 			@user_collection.should_receive(:replace).with(user_id, updated_user)
 				.and_raise(entity_not_found_error(user_id))
 
-			put "entity/user/#{user_id}", updated_user.to_json, headers
+			put "user/#{user_id}", updated_user.to_json, headers
 			last_response.status.should == be_ok
 		end
 
@@ -188,7 +188,7 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:replace).with(user_id, doc)
 				.and_raise(entity_not_found_error(user_id))
 
-			put "entity/user/#{user_id}", doc.to_json, headers
+			put "user/#{user_id}", doc.to_json, headers
 			entity_not_found?(user_id)
 		end
 
@@ -197,13 +197,13 @@ describe Datanet::Skel::API_v1 do
 			@user_collection.should_receive(:replace).with(user_id, update_without_mandatory_param)
 				.and_raise(Datanet::Skel::ValidationError.new)			
 
-			put "entity/user/#{user_id}", update_without_mandatory_param.to_json, headers
+			put "user/#{user_id}", update_without_mandatory_param.to_json, headers
 			last_response.status.should == 422
 			# TODO check validation error message
 		end
 	end	
 
-	describe 'GET /entity/:collection_name/schema' do
+	describe 'GET /:collection_name/schema' do
 		it 'returns schema json' do
 			schema = {
 				"type" => "object", 
@@ -214,7 +214,7 @@ describe Datanet::Skel::API_v1 do
 			}
 			@user_collection.should_receive(:schema).and_return(schema)
 
-			get 'entity/user/schema', nil, headers
+			get 'user/schema', nil, headers
 			last_response.status.should == be_ok
 			JSON.parse(last_response.body).should == schema
 		end
@@ -222,7 +222,7 @@ describe Datanet::Skel::API_v1 do
 			@mapper.should_receive(:collection).with('non_existing')
 				.and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
-			get 'entity/non_existing/schema', nil, headers
+			get 'non_existing/schema', nil, headers
 			last_response.status.should == 404
 		end
 	end

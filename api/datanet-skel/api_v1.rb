@@ -54,12 +54,12 @@ module Datanet
   		end
 
       desc "List registered collections names"
-      get :list do
+      get do
       	mapper.collections or []      
       end		
 
-  		desc "Model entities."
-      resource :entity do
+  		# desc "Model entities."
+       resource '/' do
 
       	desc "Get all ids of the elements stored in this Entity"
       	params do
