@@ -58,7 +58,7 @@ module Datanet
       	mapper.collections or []      
       end		
 
-  		# desc "Model entities."
+  		 desc "Model entities."
        resource '/' do
 
       	desc "Get all ids of the elements stored in this Entity"
