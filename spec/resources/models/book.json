@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "title": { "type":"string", "required": true },
+    "authId": { "type":"string", "required": true },
+    "publisherId": { "type":"string" },
+    "blurb": { "type":"string", "required": true }
+  },
+  
+  "links": [
+    { "rel":"self", "href":"entity/book/{id}" },
+    { "rel":"instances", "href":"/book" },
+    { "rel" :"writtenBy",
+      "href":"/entity/author/{authId}",
+      "targetSchema":"author"
+    },
+    { "rel" :"publishedBy",
+      "href":"/entity/publisher/{publisherId}",
+      "targetSchema":"publisher"
+    }
+  ]
+} 

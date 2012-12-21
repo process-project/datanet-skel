@@ -17,7 +17,7 @@ describe Datanet::Skel::MapperDecorator do
 		it 'lists registered collections' do
 			@model_location = models_dir
 
-			app.collections.should == ['address', 'user']
+			app.collections.should == ['address', 'book', 'user']
 		end
 
 		it 'raises exception while model directory does not exist' do
@@ -66,14 +66,24 @@ describe Datanet::Skel::EntityDecorator do
 		Datanet::Skel::EntityDecorator.new entity, model_path(model_name)
 	end
 
-	describe 'add entity' do
+	describe 'add method' do
 		it 'adds new entity when json is valid according to give schema' do
 			new_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
 			new_user_id = '1234'
 
-			entity.should_receive(:add).with(new_user).and_return(new_user_id)
+			entity.should_receive(:add).with(new_user, {}).and_return(new_user_id)
 
 			app('user').add(new_user).should == new_user_id
+		end
+
+		it 'adds valid entity with reference' do
+		 	new_book = {'title' => 'book1', 'authId' => 'existingId', 'blurb' => 'description'}
+		 	new_book_id = '1234f'
+
+		 	entity.should_receive(:add).with(new_book,
+		 		{'authId' => 'author', 'publisherId' => 'publisher'}).and_return(new_book_id)
+
+		 	app('book').add(new_book).should == new_book_id
 		end
 
 		it 'throws exception when json is not valid according to given schema' do
@@ -90,9 +100,19 @@ describe Datanet::Skel::EntityDecorator do
 			updated_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
 			user_id = '1234'
 
-			entity.should_receive(:replace).with(user_id, updated_user)
+			entity.should_receive(:replace).with(user_id, updated_user, {})
 
 			app('user').replace(user_id, updated_user)
+		end
+
+		it 'replaces valid json document with reference' do
+			updated_book = {'title' => 'book1', 'authId' => 'existingId', 'blurb' => 'description'}
+			book_id = '1234fd'
+
+			entity.should_receive(:replace).with(book_id, updated_book,
+				{'authId' => 'author', 'publisherId' => 'publisher'})
+
+			app('book').replace(book_id, updated_book)
 		end
 
 		it 'throws exception when replace json is not valid' do
@@ -108,7 +128,7 @@ describe Datanet::Skel::EntityDecorator do
 			updated_user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31, 'other' => 'something else'}
 			non_existing_id = '1235'
 
-			entity.should_receive(:replace).with(non_existing_id, updated_user)
+			entity.should_receive(:replace).with(non_existing_id, updated_user, {})
 				.and_raise(Datanet::Skel::EntityNotFoundException.new)
 
 			expect {
@@ -118,15 +138,27 @@ describe Datanet::Skel::EntityDecorator do
 	end
 
 	describe 'update entity' do
-		it 'replaces entity with valid values' do
+		it 'updates entity with valid values' do
 			updated_values = {'first_name' => 'Marek', 'another' => 'value'}
 			user = {'first_name' => 'marek', 'last_name' => 'k', 'age' => 31}
 			user_id = '1234'
 
 			entity.should_receive(:get).with(user_id).and_return(user)
-			entity.should_receive(:update).with(user_id, updated_values)
+			entity.should_receive(:update).with(user_id, updated_values, {})
 
 			app('user').update(user_id, updated_values)
+		end
+
+		it 'updates entity with valid values with reference' do
+			book = {'title' => 'book1', 'authId' => 'existingId', 'blurb' => 'description'}
+			updated_book = {'authId' => 'updatedId', 'blurb' => ' updated description'}
+			book_id = '1234fd'
+
+			entity.should_receive(:get).with(book_id).and_return(book)
+			entity.should_receive(:update).with(book_id, updated_book,
+				{'authId' => 'author', 'publisherId' => 'publisher'})
+
+			app('book').update(book_id, updated_book)
 		end
 
 		it 'throws exception while nulling required fields' do
@@ -137,7 +169,7 @@ describe Datanet::Skel::EntityDecorator do
 			entity.should_receive(:get).with(user_id).and_return(user)
 
 			expect {
-				app('user').update(user_id, wrong_updated_values)				
+				app('user').update(user_id, wrong_updated_values)
 			}.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
 		end
 	end
@@ -150,16 +182,4 @@ describe Datanet::Skel::EntityDecorator do
 			app('user').schema.should == user_schema
 		end
 	end
-end
-
-def empty_models_dir
-	File.join(File.dirname(__FILE__), '..', 'resources')
-end
-
-def models_dir
-	File.join(File.dirname(__FILE__), '..', 'resources', 'models')
-end
-
-def model_path(model_name)
-	File.join(models_dir, "#{model_name}.json")
 end

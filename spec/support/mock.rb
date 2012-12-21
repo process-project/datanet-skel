@@ -1,35 +1,35 @@
 module Datanet
-	module Skel
-		class MapperMock
-			def collections
-			end
+  module Skel
+    class MapperMock
+      def collections
+      end
 
-			def collection(entity_type)				
-			end
-		end
+      def collection(entity_type)
+      end
+    end
 
-		class CollectionMock
-			def initialize obj
+    class CollectionMock
+      def initialize obj
 
-			end
+      end
 
-			def ids
-			end
+      def ids
+      end
 
-			def add(json_doc)
-			end
+      def add(json_doc, references_map)
+      end
 
-			def get(id)
-			end
+      def get(id)
+      end
 
-			def remove(id)
-			end
+      def remove(id)
+      end
 
-			def update(id)
-			end
+      def update(id, json_doc, references_map)
+      end
 
-			def replace(id, json_doc)
-			end		
-		end
-	end
+      def replace(id, json_doc, references_map)
+      end
+    end
+  end
 end
