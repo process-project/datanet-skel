@@ -1,15 +1,15 @@
 require 'grape'
 
 module Datanet
-	module Skel
-		class API < Grape::API		
-			format :json
+  module Skel
+    class API < Grape::API
+      format :json
 
-			mount ::Datanet::Skel::API_v1
+      mount ::Datanet::Skel::API_v1
 
-			class << self
-	  			attr_accessor :mapper
-				end
-		end		
-	end
+      class << self
+          attr_accessor :mapper
+        end
+    end
+  end
 end

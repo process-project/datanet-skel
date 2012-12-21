@@ -17,10 +17,10 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib", "api"]
 
-  gem.add_runtime_dependency 'grape' 
-  gem.add_runtime_dependency 'sinatra' 
-  gem.add_runtime_dependency 'json' 
-  gem.add_runtime_dependency 'json-schema' 
+  gem.add_runtime_dependency 'grape'
+  gem.add_runtime_dependency 'sinatra'
+  gem.add_runtime_dependency 'json'
+  gem.add_runtime_dependency 'json-schema'
 
   #gem.add_development_dependency
 end

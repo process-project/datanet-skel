@@ -6,7 +6,7 @@
     "publisherId": { "type":"string" },
     "blurb": { "type":"string", "required": true }
   },
-  
+
   "links": [
     { "rel":"self", "href":"entity/book/{id}" },
     { "rel":"instances", "href":"/book" },
@@ -19,4 +19,4 @@
       "targetSchema":"publisher"
     }
   ]
-} 
+}

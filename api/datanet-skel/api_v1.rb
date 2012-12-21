@@ -9,7 +9,7 @@ module Datanet
 
       rescue_from Datanet::Skel::CollectionNotFoundException do |e|
         rack_response({:message => e.message}.to_json, 404)
-      end             
+      end
 
       rescue_from Datanet::Skel::EntityNotFoundException do |e|
         rack_response({:message => e.message}.to_json, 404)
@@ -21,66 +21,66 @@ module Datanet
 
       helpers do
         def mapper
-        	API.mapper
+          API.mapper
         end
 
         def doc!
-        	doc = env['rack.request.form_hash']
-        end    		
+          doc = env['rack.request.form_hash']
+        end
 
         def collection
-        	mapper.collection(params[:collection_name])
+          mapper.collection(params[:collection_name])
         end
 
         def entity!
-        	collection.get id
+          collection.get id
         end
 
         def id
-        	params[:id]
+          params[:id]
         end
 
         def logger
-        	API.logger
+          API.logger
         end
 
         def halt_on_empty!(obj, status, message)
-        	if obj.nil?        
-        		halt status, message
-        	else
-        		obj
-        	end
+          if obj.nil?
+            halt status, message
+          else
+            obj
+          end
         end
-  		end
+      end
 
       desc "List registered collections names"
       get do
-      	mapper.collections or []      
-      end		
+        mapper.collections or []
+      end
 
-  		 desc "Model entities."
+       desc "Model entities."
        resource '/' do
 
-      	desc "Get all ids of the elements stored in this Entity"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'
-      	end
-      	get ":collection_name" do          
-          if request.params.size > 0 then 
+        desc "Get all ids of the elements stored in this Entity"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+        end
+        get ":collection_name" do
+          if request.params.size > 0 then
             collection.search(request.params)
           else
-      		  collection.ids or []        
+            collection.ids or []
           end
-      	end
+        end
 
-      	desc "Add new entity"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'      		
-      	end
-      	post ":collection_name" do
-      		logger.debug "Adding new entity into '#{params[:collection_name]}' collection"                
-      		collection.add doc!
-      	end
+        desc "Add new entity"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+        end
+        post ":collection_name" do
+          logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
+          collection.add doc!
+        end
 
         desc "Get entity schema"
         params do
@@ -90,46 +90,46 @@ module Datanet
           collection.schema
         end
 
-      	desc "Get entity with given id"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'
-      		requires :id, :desc => "Entity id"
-      	end
-      	get ":collection_name/:id" do
-      		 logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
-      		 entity!
-      	end
+        desc "Get entity with given id"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+          requires :id, :desc => "Entity id"
+        end
+        get ":collection_name/:id" do
+           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
+           entity!
+        end
 
-      	desc "Delete entity with given id"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'
-      		requires :id, :desc => "Entity id"
-      	end
-      	delete ":collection_name/:id" do
-      		collection.remove id
-      		nil
-      	end
+        desc "Delete entity with given id"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+          requires :id, :desc => "Entity id"
+        end
+        delete ":collection_name/:id" do
+          collection.remove id
+          nil
+        end
 
-      	desc "Update entity with given id"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'
-      		requires :id, :desc => "Entity id"
-      	end
-      	post ":collection_name/:id" do      		
-      		collection.update id, doc!
-      		nil
-      	end
+        desc "Update entity with given id"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+          requires :id, :desc => "Entity id"
+        end
+        post ":collection_name/:id" do
+          collection.update id, doc!
+          nil
+        end
 
-      	desc "Replace entity with given id"
-      	params do
-      		requires :collection_name, :desc => 'Collection name'
-      		requires :id, :desc => "Entity id"
-      	end
-      	put ":collection_name/:id" do
-      		collection.replace id, doc!
-      		nil
-      	end      
-      end    
+        desc "Replace entity with given id"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+          requires :id, :desc => "Entity id"
+        end
+        put ":collection_name/:id" do
+          collection.replace id, doc!
+          nil
+        end
+      end
     end
   end
 end

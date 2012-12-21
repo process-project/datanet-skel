@@ -24,13 +24,13 @@ end
 
 
 def empty_models_dir
-	File.join(File.dirname(__FILE__), 'resources')
+  File.join(File.dirname(__FILE__), 'resources')
 end
 
 def models_dir
-	File.join(File.dirname(__FILE__), 'resources', 'models')
+  File.join(File.dirname(__FILE__), 'resources', 'models')
 end
 
 def model_path(model_name)
-	File.join(models_dir, "#{model_name}.json")
+  File.join(models_dir, "#{model_name}.json")
 end
