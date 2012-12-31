@@ -4,7 +4,6 @@ module Datanet
   module Skel
     class API_v1 < Grape::API
       version 'v1', :using => :header, :vendor => 'datanet'
-      error_format :json
       default_format :json
 
       rescue_from Datanet::Skel::CollectionNotFoundException do |e|
