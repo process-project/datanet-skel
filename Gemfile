@@ -14,6 +14,9 @@ group :development, :test do
 	
 	gem 'rspec'
 	gem 'rspec-mocks'
+	
+	gem 'settingslogic'
+	
   gem 'rack-test'
 	
 	gem 'libnotify'
