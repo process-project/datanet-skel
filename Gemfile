@@ -6,7 +6,6 @@ gemspec
 group :development, :test do
   gem 'rake'
 
-<<<<<<< HEAD
   gem 'shotgun'
   gem 'pry'
 
@@ -15,19 +14,6 @@ group :development, :test do
 
   gem 'rspec'
   gem 'rspec-mocks'
-=======
-	gem 'shotgun'
-	gem 'pry'
-	
-	gem 'guard'
-	gem 'guard-rspec'
-	
-	gem 'rspec'
-	gem 'rspec-mocks'
-	
-	gem 'settingslogic'
-	
->>>>>>> bwilk
   gem 'rack-test'
 
   gem 'libnotify'

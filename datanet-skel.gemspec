@@ -21,6 +21,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'sinatra'
   gem.add_runtime_dependency 'json'
   gem.add_runtime_dependency 'json-schema'
+  gem.add_runtime_dependency 'settingslogic'
 
   #gem.add_development_dependency
 end
