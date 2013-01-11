@@ -1,17 +1,17 @@
 require 'spec_helper'
 require 'datanet-skel/exceptions'
 require 'settings'
+require 'datanet-logger'
 
 describe Datanet::Skel::PortalAuthenticatable do
 
 	def auth
-    Datanet::Skel::PortalAuthenticatable.PORTAL_BASE_URL = Settings.portal_base_url
-    Datanet::Skel::PortalAuthenticatable.PORTAL_SHARED_KEY = Settings.portal_shared_key
-    auth = Datanet::Skel::PortalAuthenticatable.new
+    @auth = Datanet::Skel::PortalAuthenticatable.new(Settings.portal_base_url, Settings.portal_shared_key) unless @auth != nil
 	end
 
   it 'logs into portal API' do
-    auth.plgrid_portal_auth(Settings.user,Settings.Password)
+    status = auth.plgrid_portal_user_check(Settings.portal_test_user,Settings.portal_test_password)
+    status.should == true
   end
 
 end

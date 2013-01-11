@@ -6,6 +6,7 @@ module Datanet
     autoload :API_v1,                       'datanet-skel/api_v1'
     autoload :MapperDecorator,              'datanet-skel/decorator'
     autoload :RelationInspector,            'datanet-skel/relation_inspector'
+    autoload :PortalAuthenticatable,        'datanet-skel/portal_authenticatable'
 
     autoload :CollectionNotFoundException,  'datanet-skel/exceptions'
     autoload :EntityNotFoundException,      'datanet-skel/exceptions'

@@ -1,6 +1,7 @@
 require 'net/https'
 require 'digest/sha1'
 require 'base64'
+require 'datanet-logger'
 
 module Datanet
   module Skel
@@ -8,8 +9,13 @@ module Datanet
     class PortalAuthenticatable
 
       def initialize(portal_base_url, portal_shared_key)
-        :portal_base_url = portal_base_url
-        :portal_shared_key = portal_shared_key
+        @portal_base_url = portal_base_url
+        @portal_shared_key = portal_shared_key
+      end
+
+      def plgrid_portal_user_check(login, password)
+        status, token = plgrid_portal_auth(login, password)
+        status
       end
 
       # Assuming we already know who's the user, we authenticate her again with the portal, to start a new session
@@ -56,7 +62,7 @@ module Datanet
 
         # If we can't get to portal for some reason, we try to work with what we have now in local DB
         unless status
-          puts "[PortalAuth] Problem with retrieval of user data from Portal. Code (#{response.code}). Trying to rely on local DB for now."
+          logger.warn "[PortalAuth] Problem with retrieval of user data from Portal. Code (#{response.code}). Trying to rely on local DB for now."
           return User.find_by_login(login)
         end
 
@@ -78,7 +84,7 @@ module Datanet
           :email => get_xml_content(main_data, "email")
         }
 
-        puts "[PortalAuth] Retrived full data of (#{authentication_hash[:login]}): #{user_data}."
+        logger.debug "[PortalAuth] Retrived full data of (#{authentication_hash[:login]}): #{user_data}."
         user = User.where(:login => login).first_or_create(user_data)
         user.update_attributes(user_data)
         user
@@ -100,19 +106,19 @@ module Datanet
         # NOTE: see other HTTPResponse cases: http://www.ensta-paristech.fr/~diam/ruby/online/ruby-doc-stdlib/libdoc/net/http/rdoc/classes/Net/HTTPResponse.html
         return [false,:portal_access_probelm] if response.nil?
         if (not response.kind_of?(Net::HTTPSuccess)) or response.kind_of?(Net::HTTPNoContent)
-          puts "[PortalAuth] Application layer error in communication with Portal. Code (#{response.code})."
+          logger.warn "[PortalAuth] Application layer error in communication with Portal. Code (#{response.code})."
           if response.class.body_permitted?
-            puts "[PortalAuth] " + response.body.to_s
+            logger.warn "[PortalAuth] " + response.body.to_s
           else
-            puts "[PortalAuth] No response 'body' supplied."
+            logger.logger "[PortalAuth] No response 'body' supplied."
           end
           return [false,:portal_access_probelm]
         end
         status = get_attribute(response.body, "response", "status")
         if status == "failed"
           cause = get_xml_content(response.body.to_s, "cause")
-          puts "[PortalAuth] Portal API call failed. Cause: #{cause}. Full response body below."
-          puts response.body
+          logger.warn "[PortalAuth] Portal API call failed. Cause: #{cause}. Full response body below."
+          logger.warn response.body
           return [false,cause]
         end
         [true,nil]
@@ -133,7 +139,7 @@ module Datanet
       #   * when !is_ok, content contains nil or the explanation of the problem(s) encountered
       #   * when is_ok,  content contains the response HTTPS message
       def do_https(endpoint, is_get = true, pass_hash = nil)
-        puts "[PortalAuth] Performing https get on endpoint: #{endpoint} ."
+        logger.debug "[PortalAuth] Performing https get on endpoint: #{endpoint} ."
         uri = URI(endpoint)
         http = Net::HTTP.new(uri.host, uri.port)
         http.use_ssl = true
@@ -160,9 +166,9 @@ module Datanet
           end
           [true, response]
         rescue Exception => e
-          puts "[PortalAuth] [ERROR] Transport layer error in communication with Portal."
-          puts "[PortalAuth] [ERROR] Exception message: [#{e.message}]. Stacktrace:"
-          puts e.backtrace.inspect
+          logger.error "[PortalAuth] [ERROR] Transport layer error in communication with Portal."
+          logger.error "[PortalAuth] [ERROR] Exception message: [#{e.message}]. Stacktrace:"
+          logger.error e.backtrace.inspect
           # TG: call the doctor! (here: 'request' means the user's webapp request, not our request to the portal)
           #ExceptionNotifier::Notifier.exception_notification(request.env, e, :data => {:description => "Error in communication with Portal.", :message => e.message, :portal_endpoint => endpoint}).deliver
           [false, :portal_access_probelm]
@@ -180,8 +186,13 @@ module Datanet
         # TG: the correct value for production
         #Integromics::Application.config.plgrid_portal_base_url + PORTAL_SHARED_KEY + "/"
         #PORTAL_BASE_URL + PORTAL_SHARED_KEY + "/"
-        :portal_base_ur + :portal_shared_key + "/"
+        @portal_base_url + @portal_shared_key + "/"
       end
+
+      def logger
+        Logger.logger
+      end
+
     end
   end
 end

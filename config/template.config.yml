@@ -1,6 +1,6 @@
 # config/config.yml
 
-portal_base_url:
+portal_base_url: "https://zeus41.cyf-kr.edu.pl:8443/aruliferay/api/external/"
 portal_shared_key:
-user:
-password:
+portal_test_user:
+portal_test_password:

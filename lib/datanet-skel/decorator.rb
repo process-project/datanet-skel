@@ -1,5 +1,4 @@
-require 'json-sche#To change this template use File | Settings | File Templates.
-    true.should == falsema'
+require 'json-schema'
 require 'delegate'
 
 module Datanet
