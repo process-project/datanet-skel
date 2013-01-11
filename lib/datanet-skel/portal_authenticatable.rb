@@ -7,6 +7,11 @@ module Datanet
     # Special authentication strategy to allow user auth with the 3rd party PLGrid Portal.
     class PortalAuthenticatable
 
+      def initialize(portal_base_url, portal_shared_key)
+        :portal_base_url = portal_base_url
+        :portal_shared_key = portal_shared_key
+      end
+
       # Assuming we already know who's the user, we authenticate her again with the portal, to start a new session
       # Returns: [is_ok, token] - if is_ok == true (the user auth is a success), token == the portal token issued for this user session
       def plgrid_portal_auth(login, password)
@@ -174,7 +179,8 @@ module Datanet
 
         # TG: the correct value for production
         #Integromics::Application.config.plgrid_portal_base_url + PORTAL_SHARED_KEY + "/"
-        PORTAL_BASE_URL + PORTAL_SHARED_KEY + "/"
+        #PORTAL_BASE_URL + PORTAL_SHARED_KEY + "/"
+        :portal_base_ur + :portal_shared_key + "/"
       end
     end
   end
