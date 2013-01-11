@@ -13,7 +13,7 @@ module Datanet
         @portal_shared_key = portal_shared_key
       end
 
-      def plgrid_portal_user_check(login, password)
+      def authenticate(login, password)
         status, token = plgrid_portal_auth(login, password)
         status
       end

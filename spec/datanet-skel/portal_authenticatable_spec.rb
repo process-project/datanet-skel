@@ -9,9 +9,19 @@ describe Datanet::Skel::PortalAuthenticatable do
     @auth = Datanet::Skel::PortalAuthenticatable.new(Settings.portal_base_url, Settings.portal_shared_key) unless @auth != nil
 	end
 
-  it 'logs into portal API' do
-    status = auth.plgrid_portal_user_check(Settings.portal_test_user,Settings.portal_test_password)
+  it 'logs into portal API with proper credentials' do
+    status = auth.authenticate(Settings.portal_test_user, Settings.portal_test_password)
     status.should == true
+  end
+
+  it 'tries to log into portal API with wrong credentials and fails' do
+    status = auth.authenticate(Settings.portal_test_user, "wrong+password")
+    status.should == false
+  end
+
+  it 'tries to log into portal API with wrong credentials and fails' do
+    status = auth.authenticate("wrong+user", Settings.portal_test_password)
+    status.should == false
   end
 
 end

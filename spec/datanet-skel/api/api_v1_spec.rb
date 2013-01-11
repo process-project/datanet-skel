@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'base64'
 
 describe Datanet::Skel::API_v1 do
 	include Rack::Test::Methods
@@ -8,7 +9,8 @@ describe Datanet::Skel::API_v1 do
 	end
 
 	def headers(options={})
-		{'HTTP_ACCEPT' => "application/vnd.datanet-v1+json"}.merge(options)		
+		{'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
+     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password")}.merge(options)
 	end
 
 	before(:each) do

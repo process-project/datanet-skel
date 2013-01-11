@@ -18,6 +18,14 @@ module Datanet
         Rack::Response.new([e.message], 422)
       end
 
+      http_basic do |user,password|
+        if API.auth
+          API.auth.authenticate(user, password)
+        else
+          true
+        end
+      end
+
       helpers do
         def mapper
           API.mapper
