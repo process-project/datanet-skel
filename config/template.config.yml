@@ -1,0 +1,6 @@
+# config/config.yml
+
+portal_base_url:
+portal_shared_key:
+user:
+password:
