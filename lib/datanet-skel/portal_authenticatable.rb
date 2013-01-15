@@ -1,7 +1,6 @@
 require 'net/https'
 require 'digest/sha1'
 require 'base64'
-require 'datanet-logger'
 
 module Datanet
   module Skel
@@ -190,7 +189,7 @@ module Datanet
       end
 
       def logger
-        Logger.logger
+        API.logger
       end
 
     end

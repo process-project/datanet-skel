@@ -19,11 +19,7 @@ module Datanet
       end
 
       http_basic do |user,password|
-        if API.auth
-          API.auth.authenticate(user, password)
-        else
-          true
-        end
+        API.auth ? API.auth.authenticate(user, password) : true
       end
 
       helpers do
