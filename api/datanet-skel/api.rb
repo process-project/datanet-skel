@@ -8,9 +8,8 @@ module Datanet
       mount ::Datanet::Skel::API_v1
 
       class << self
-          attr_accessor :mapper, :auth
-        end
+        attr_accessor :mapper, :auth
+      end
     end
-
   end
 end
