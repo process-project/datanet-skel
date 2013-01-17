@@ -22,7 +22,6 @@ Dir["#{File.dirname(__FILE__)}/support/*.rb"].each do |file|
 end
 
 
-
 def empty_models_dir
   File.join(File.dirname(__FILE__), 'resources')
 end
