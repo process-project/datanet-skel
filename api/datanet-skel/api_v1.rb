@@ -28,7 +28,7 @@ module Datanet
         end
 
         def doc!
-          doc = JSON.parse(env['rack.request.form_input'].string)
+          JSON.parse(env['rack.request.form_input'].string)
         end
 
         def collection
