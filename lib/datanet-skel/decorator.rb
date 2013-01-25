@@ -48,7 +48,16 @@ module Datanet
         super(obj)
       end
 
-      def add(json_doc)
+      def add(json_doc, files = nil)
+        # TODO implement file upload and file entity generation
+        unless files.nil?
+          files.each do |fieldname, content|
+            unless json_doc["#{fieldname}_id"].nil?
+              raise Datanet::Skel::ValidationError.new "FAIL"
+            end
+          end
+        end
+
         valid! json_doc
         super(json_doc, @inspector.relations)
       end

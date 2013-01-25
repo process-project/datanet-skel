@@ -1,0 +1,19 @@
+--AaB03x
+Content-Disposition: form-data; name="metadata"; filename="metadata.json"
+Content-Type: application/json
+
+{ "attr": "value" }
+--AaB03x
+Content-Disposition: form-data; name="neighbor"; filename="picture.jpg"
+Content-Type: image/jpeg
+Content-Transfer-Encoding: binary
+
+contents
+--AaB03x
+Content-Disposition: form-data; name="neighbor2"; filename="picture2.jpg"
+Content-Type: image/jpeg
+Content-Transfer-Encoding: binary
+
+contents
+--AaB03x--
+

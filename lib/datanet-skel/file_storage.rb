@@ -24,6 +24,12 @@ module Datanet
         file_path
       end
 
+      def delete_file(path)
+        @conn.in_session do |sftp|
+          sftp.remove!(path)
+        end
+      end
+
     private
 
       # TODO insecure method - file may exist

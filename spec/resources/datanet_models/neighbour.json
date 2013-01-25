@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "first_name": {"type": "string", "required": true},
+        "avatar_id"    : {"type": "string"}
+    },
+
+    "links": [
+        { "rel" :"avatar",
+            "href":"/file/{avatar_id}",
+            "targetSchema":"file"
+        }
+    ]
+}

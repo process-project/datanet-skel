@@ -8,10 +8,17 @@ describe Datanet::Skel::API_v1 do
 		Datanet::Skel::API
 	end
 
-	def headers(options={})
-		{'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
+  def headers(options={})
+    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
      'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password")}.merge(options)
-	end
+  end
+
+  def headers2(options={})
+    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
+     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
+     'CONTENT_TYPE' => "multipart/form-data; boundary=AaB03x",
+    }.merge(options)
+  end
 
 	before(:each) do
 		@user_collection = mock(Datanet::Skel::CollectionMock)
@@ -90,18 +97,27 @@ describe Datanet::Skel::API_v1 do
 	end
 
 	describe 'POST /:collection_name' do
-		it 'adds valid entity into user collection' do
-			new_user = {'first_name' => 'marek', 'age' => 31}
-			@user_collection.should_receive(:add).with(new_user).and_return(user_id)
+    it 'adds valid entity into user collection' do
+      new_user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
 
-			post 'user', new_user.to_json, headers
-			last_response.status.should == 201
-			last_response.body.should == user_id
-		end
+      post 'user', new_user.to_json, headers
+      last_response.status.should == 201
+      last_response.body.should == user_id
+    end
+
+    it 'adds invalid entity into user collection' do
+      new_user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
+
+      post 'user', new_user.to_json, headers2
+      last_response.status.should == 201
+      last_response.body.should == user_id
+    end
 
 		it 'adds invalid entity into user collection' do
 			new_user = {'first_name' => 'marek'}
-			@user_collection.should_receive(:add).with(new_user)
+			@user_collection.should_receive(:add).with(new_user, nil)
 				.and_raise(Datanet::Skel::ValidationError.new)
 
 			post 'user', new_user.to_json, headers
@@ -175,35 +191,35 @@ describe Datanet::Skel::API_v1 do
 		end
 	end
 
-	describe 'PUT /:collection_name/:id' do
-		it 'overwites existing user entity' do
-			updated_user = {'first_name' => 'marek', 'age' => 31}
-			@user_collection.should_receive(:replace).with(user_id, updated_user)
-				.and_raise(entity_not_found_error(user_id))
+  describe 'PUT /:collection_name/:id' do
+    it 'overwites existing user entity' do
+      updated_user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:replace).with(user_id, updated_user)
+      .and_raise(entity_not_found_error(user_id))
 
-			put "user/#{user_id}", updated_user.to_json, headers
-			last_response.status.should == be_ok
-		end
+      put "user/#{user_id}", updated_user.to_json, headers
+      last_response.status.should == be_ok
+    end
 
-		it 'overwrites non existing user entity' do
-			doc = {'not' => 'important'}
-			@user_collection.should_receive(:replace).with(user_id, doc)
-				.and_raise(entity_not_found_error(user_id))
+    it 'overwrites non existing user entity' do
+      doc = {'not' => 'important'}
+      @user_collection.should_receive(:replace).with(user_id, doc)
+      .and_raise(entity_not_found_error(user_id))
 
-			put "user/#{user_id}", doc.to_json, headers
-			entity_not_found?(user_id)
-		end
+      put "user/#{user_id}", doc.to_json, headers
+      entity_not_found?(user_id)
+    end
 
-		it 'overwrites existing user entity with not correct values' do
-			update_without_mandatory_param = {'age' => 31}
-			@user_collection.should_receive(:replace).with(user_id, update_without_mandatory_param)
-				.and_raise(Datanet::Skel::ValidationError.new)
+    it 'overwrites existing user entity with not correct values' do
+      update_without_mandatory_param = {'age' => 31}
+      @user_collection.should_receive(:replace).with(user_id, update_without_mandatory_param)
+      .and_raise(Datanet::Skel::ValidationError.new)
 
-			put "user/#{user_id}", update_without_mandatory_param.to_json, headers
-			last_response.status.should == 422
-			# TODO check validation error message
-		end
-	end
+      put "user/#{user_id}", update_without_mandatory_param.to_json, headers
+      last_response.status.should == 422
+      # TODO check validation error message
+    end
+  end
 
 	describe 'GET /:collection_name/schema' do
 		it 'returns schema json' do

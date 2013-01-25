@@ -17,7 +17,7 @@ describe Datanet::Skel::MapperDecorator do
     it 'lists registered collections' do
       @model_location = models_dir
 
-      app.collections.should == ['address', 'book', 'user']
+      app.collections.should == ['address', 'book', 'file', 'user', 'with_file']
     end
 
     it 'raises exception while model directory does not exist' do
@@ -93,6 +93,24 @@ describe Datanet::Skel::EntityDecorator do
         app('user').add(not_valid_user)
       }.to raise_error(Datanet::Skel::ValidationError, 'Wrong json format')
     end
+
+    it 'throws exception when adding a file together with metadata file reference attribute' do
+      valid_entity = {'first_name' => 'marek', 'avatar_id' => 'this_is_a_cause_of_failure' }
+      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => '' }}
+
+      expect {
+        app('with_file').add(valid_entity, files)
+      }.to raise_error(Datanet::Skel::ValidationError, 'FAIL')
+    end
+
+    it 'throws exception when adding metadata with wrong file reference attribute' do
+      invalid_entity = {'first_name' => 'marek', 'avatar_id' => 'this_is_a_cause_of_failure' }
+
+      expect {
+        app('with_file').add(invalid_entity)
+      }.to raise_error(Datanet::Skel::ValidationError, 'FAIL')
+    end
+
   end
 
   describe 'replace entity' do

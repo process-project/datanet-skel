@@ -1,0 +1,16 @@
+{
+    "type": "object",
+    "properties": {
+        "first_name": {"type": "string", "required": true},
+        "avatar_id"    : {"type": "string", "required": false}
+    },
+
+    "links": [
+        { "rel" :"avatar",
+            "href":"/entity/file/{avatar_id}",
+            "targetSchema":"file"
+        }
+    ]
+}
+
+
