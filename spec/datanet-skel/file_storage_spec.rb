@@ -11,12 +11,19 @@ describe Datanet::Skel::FileStorage do
     @payload = "sample payload"
   end
 
-  it "should initialize object by creating datanet directory" do
+  def sftp
+    @sftp ||= double
+  end
 
-    # doubles
-    sftp = double()
-    conn = double()
-    dir = double()
+  def conn
+    @conn ||= double
+  end
+
+  def dir
+    @dir ||= double
+  end
+
+  it "should initialize object by creating datanet directory" do
 
     # stubs
     conn.stub(:sftp_user).and_return(@user)
@@ -33,11 +40,6 @@ describe Datanet::Skel::FileStorage do
   end
 
   it "should initialize object by using existing datanet directory" do
-
-    # doubles
-    sftp = double()
-    conn = double()
-    dir = double()
 
     # subs
     conn.stub(:sftp_user).and_return(@user)
@@ -58,8 +60,6 @@ describe Datanet::Skel::FileStorage do
   it "should store payload into newly created file" do
 
     # doubles
-    sftp = double()
-    conn = double()
     file = double()
     inner_file = double()
 

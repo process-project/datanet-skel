@@ -13,6 +13,7 @@ describe Datanet::Skel::API_v1 do
      'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password")}.merge(options)
   end
 
+  # why it does not work at all?
   def headers2(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
      'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),

@@ -30,14 +30,14 @@ module Datanet
             set_metadata value[:tempfile].read
           end
         end
-        params.each do |key, value|
-          next if key == "metadata"
+        params.each do |attr, value|
+          next if attr == "metadata"
           if value.instance_of? Hash
-            payload = value.has_key?(:tempfile) ? value[:tempfile].read : ""
+            payload = value.has_key?(:tempfile) ? value[:tempfile].read : ""       # TODO - pass stream
             filename = value.has_key?(:filename) ? value[:filename] : ""
-            set_file key, { :filename => filename, :payload => payload }
+            set_file attr, { :filename => filename, :payload => payload }
           elsif value.instance_of? String
-            set_field key, value
+            set_field attr, value
           end
         end
         process_fields

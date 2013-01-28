@@ -7,8 +7,12 @@ describe Datanet::Skel::MapperDecorator do
     @mapper ||= mock(Datanet::Skel::MapperMock)
   end
 
+  def file_storage
+    @file_storage ||= double
+  end
+
   def app
-    app = Datanet::Skel::MapperDecorator.new mapper
+    app = Datanet::Skel::MapperDecorator.new(mapper, file_storage)
     app.model_location = @model_location
     app
   end
@@ -62,8 +66,16 @@ describe Datanet::Skel::EntityDecorator do
     @entity ||= mock(Datanet::Skel::CollectionMock)
   end
 
+  def file_storage
+    @file_storage ||= double
+  end
+
+  def mapper_decorator
+    @mapper_decorator ||= double
+  end
+
   def app model_name
-    Datanet::Skel::EntityDecorator.new entity, model_path(model_name)
+    Datanet::Skel::EntityDecorator.new(entity, model_path(model_name), file_storage, mapper_decorator)
   end
 
   describe 'add method' do
@@ -100,17 +112,28 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('with_file').add(valid_entity, files)
-      }.to raise_error(Datanet::Skel::ValidationError, 'FAIL')
+      }.to raise_error(Datanet::Skel::ValidationError, 'File upload conflicts with file reference attribute \'avatar\'')
     end
 
-    it 'throws exception when adding metadata with wrong file reference attribute' do
-      invalid_entity = {'first_name' => 'marek', 'avatar_id' => 'this_is_a_cause_of_failure' }
+    it 'adds valid entity with files' do
+      valid_entity = {'first_name' => 'marek'}
+      payload = 'payload'
+      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload }}
 
-      expect {
-        app('with_file').add(invalid_entity)
-      }.to raise_error(Datanet::Skel::ValidationError, 'FAIL')
+      file_path = "/some/path/on/sftp"
+      file_storage.should_receive(:store_payload).with(payload).and_return(file_path)
+
+      file_collection = double
+      mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
+
+      file_id = "filei123"
+      file_collection.should_receive(:add).and_return(file_id)
+
+      new_entity_id = "id_123"
+      entity.should_receive(:add).with(valid_entity, {'avatar_id'=>'file'}).and_return(new_entity_id)
+
+      app('with_file').add(valid_entity, files).should == new_entity_id
     end
-
   end
 
   describe 'replace entity' do
@@ -147,7 +170,7 @@ describe Datanet::Skel::EntityDecorator do
       non_existing_id = '1235'
 
       entity.should_receive(:replace).with(non_existing_id, updated_user, {})
-        .and_raise(Datanet::Skel::EntityNotFoundException.new)
+      .and_raise(Datanet::Skel::EntityNotFoundException.new)
 
       expect {
         app('user').replace(non_existing_id, updated_user)

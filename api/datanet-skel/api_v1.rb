@@ -35,9 +35,9 @@ module Datanet
 
         def doc!
           if multipart
-            doc = JSON.parse(multipart.metadata)
+            JSON.parse(multipart.metadata)
           else
-            doc = JSON.parse(env['rack.request.form_input'].string)
+            JSON.parse(env['rack.request.form_input'].string)
           end
         end
 
@@ -101,6 +101,7 @@ module Datanet
         end
         post ":collection_name" do
           logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
+          puts env['CONTENT_TYPE']
           collection.add(doc!, files)
         end
 

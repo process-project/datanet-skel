@@ -6,6 +6,11 @@ module Datanet
     class MapperDecorator < SimpleDelegator
       attr_accessor :model_location
 
+      def initialize(obj, file_storage)
+        @file_storage = file_storage
+        super(obj)
+      end
+
       def collections
         raise Datanet::Skel::WrongModelLocationError, 'Wrong models directory location' unless
           File.directory?(model_location)
@@ -23,7 +28,7 @@ module Datanet
 
       def collection(entity_type)
         path = entity_path!(entity_type)
-        EntityDecorator.new super, path
+        EntityDecorator.new(super, path, @file_storage, self)
       end
 
     private
@@ -41,23 +46,26 @@ module Datanet
     end
 
     class EntityDecorator < SimpleDelegator
-      def initialize(obj, model_path)
+      def initialize(obj, model_path, file_storage, decorated_mapper)
         @model_path = model_path
+        @file_storage = file_storage
+        @decorated_mapper = decorated_mapper
         @inspector = Datanet::Skel::RelationInspector.new(model_path)
 
         super(obj)
       end
 
       def add(json_doc, files = nil)
-        # TODO implement file upload and file entity generation
         unless files.nil?
-          files.each do |fieldname, content|
-            unless json_doc["#{fieldname}_id"].nil?
-              raise Datanet::Skel::ValidationError.new "FAIL"
+          files.each do |attr, file|
+            unless json_doc["#{attr}_id"].nil?
+              raise Datanet::Skel::ValidationError.new "File upload conflicts with file reference attribute \'#{attr}\'"
             end
+            path = @file_storage.store_payload(file[:payload])
+            file_json = { 'file_name' => file[:filename] , 'file_path' => path }
+            json_doc["#{attr}_id"] = @decorated_mapper.collection('file').add(file_json)
           end
         end
-
         valid! json_doc
         super(json_doc, @inspector.relations)
       end
@@ -87,6 +95,7 @@ module Datanet
           raise Datanet::Skel::ValidationError.new 'Wrong json format'
         end
       end
+
     end
   end
 end
