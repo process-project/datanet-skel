@@ -7,7 +7,8 @@ module Datanet
         container = Datanet::Skel::Container.new
         begin
           yield container
-        rescue
+        rescue Exception => e
+          puts "Action failed: #{e}"
           container.rollback_succeeded
         end
       end
@@ -20,7 +21,7 @@ module Datanet
         @success_list = Array.new
       end
 
-      def succeded action
+      def succeeded action
         @success_list.push action
       end
 
