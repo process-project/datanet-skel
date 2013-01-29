@@ -14,21 +14,17 @@ describe Datanet::Skel::API_v1 do
      'CONTENT_TYPE' => "application/json"}.merge(options)
   end
 
-  def headers2(options={})
-    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json, form",
+  def headers_multipart(options={})
+    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
      'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
      'CONTENT_TYPE' => "multipart/form-data; boundary=AaB03x",
     }.merge(options)
   end
 
-  def multipart_stream(name, boundary = "AaB03x")
-    file = multipart_file(name)
+  def multipart_stream(name)
+    file = File.join(File.dirname(__FILE__), "../multipart", name.to_s)
     data = File.open(file, 'rb') { |io| io.read }
     StringIO.new(data)
-  end
-
-  def multipart_file(name)
-    File.join(File.dirname(__FILE__), "../multipart", name.to_s)
   end
 
   before(:each) do
@@ -111,15 +107,19 @@ describe Datanet::Skel::API_v1 do
     it 'adds valid entity into user collection' do
       new_user = {'first_name' => 'marek', 'age' => 31}
       @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
-
+                                                                                                                                                                     \
       post 'user', new_user.to_json, headers
       last_response.status.should == 201
       last_response.body.should == user_id
     end
 
     it 'this scary evil post' do
-      @user_collection.should_receive(:add).with("{ \"attr\": \"value\" }", {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}).and_return(user_id)
-      post 'user', multipart_stream(:message_json_string), headers2
+      @user_collection.should_receive(:add).with("{ \"attr\": \"value\" }",
+        {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}).and_return(user_id)
+
+      post 'user', multipart_stream(:message_json_string), headers_multipart
+      last_response.status.should == 201
+      last_response.body.should == user_id
     end
 
 		it 'adds invalid entity into user collection' do

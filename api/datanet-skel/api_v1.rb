@@ -7,8 +7,7 @@ module Datanet
       version 'v1', :using => :header, :vendor => 'datanet'
 
       default_format :json
-      content_type :json_text, "text/json"
-      content_type :json_app, "application/json"
+      content_type :json, "application/json"
       content_type :multipart, "multipart/form-data"
 
       rescue_from Datanet::Skel::CollectionNotFoundException do |e|
@@ -129,7 +128,7 @@ module Datanet
           requires :id, :desc => "Entity id"
         end
         delete ":collection_name/:id" do
-          collection.remove id
+          collection. remove id
           nil
         end
 
