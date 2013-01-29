@@ -3,7 +3,7 @@ require 'grape'
 module Datanet
   module Skel
     class API < Grape::API
-      format :json
+      #format :json
 
       mount ::Datanet::Skel::API_v1
 

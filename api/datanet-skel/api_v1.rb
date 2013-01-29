@@ -1,15 +1,15 @@
 require 'datanet-skel/exceptions'
-require 'datanet-skel/multipart_parser'
+require 'datanet-skel/multipart'
 
 module Datanet
   module Skel
     class API_v1 < Grape::API
       version 'v1', :using => :header, :vendor => 'datanet'
-      default_format :json
 
-      content_type :json, "text/json"
+      default_format :json
+      content_type :json_text, "text/json"
+      content_type :json_app, "application/json"
       content_type :multipart, "multipart/form-data"
-      parser :multipart, Datanet::Skel::MultipartParser
 
       rescue_from Datanet::Skel::CollectionNotFoundException do |e|
         rack_response({:message => e.message}.to_json, 404)
@@ -34,15 +34,16 @@ module Datanet
         end
 
         def doc!
-          if multipart
-            JSON.parse(multipart.metadata)
+
+          if @request.form_data?
+            form_data.metadata
           else
-            JSON.parse(env['rack.request.form_input'].string)
+            JSON.parse(env['rack.input'].string)
           end
         end
 
         def files
-          multipart ? multipart.files : nil
+          @request.form_data? ? form_data.files : nil
         end
 
         def collection
@@ -57,9 +58,9 @@ module Datanet
           params[:id]
         end
 
-        def multipart
+        def form_data
           # provided by MultipartParser
-          params[:multipart]
+          @multipart_form_data ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"])
         end
 
         def logger
@@ -101,7 +102,6 @@ module Datanet
         end
         post ":collection_name" do
           logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
-          puts env['CONTENT_TYPE']
           collection.add(doc!, files)
         end
 

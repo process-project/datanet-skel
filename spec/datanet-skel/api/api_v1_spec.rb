@@ -10,18 +10,28 @@ describe Datanet::Skel::API_v1 do
 
   def headers(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
-     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password")}.merge(options)
+     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
+     'CONTENT_TYPE' => "application/json"}.merge(options)
   end
 
-  # why it does not work at all?
   def headers2(options={})
-    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
+    {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json, form",
      'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
      'CONTENT_TYPE' => "multipart/form-data; boundary=AaB03x",
     }.merge(options)
   end
 
-	before(:each) do
+  def multipart_stream(name, boundary = "AaB03x")
+    file = multipart_file(name)
+    data = File.open(file, 'rb') { |io| io.read }
+    StringIO.new(data)
+  end
+
+  def multipart_file(name)
+    File.join(File.dirname(__FILE__), "../multipart", name.to_s)
+  end
+
+  before(:each) do
 		@user_collection = mock(Datanet::Skel::CollectionMock)
 		@mapper = mock(Datanet::Skel::MapperMock)
 		@mapper.stub(:collection).with('user')
@@ -107,13 +117,9 @@ describe Datanet::Skel::API_v1 do
       last_response.body.should == user_id
     end
 
-    it 'adds invalid entity into user collection' do
-      new_user = {'first_name' => 'marek', 'age' => 31}
-      @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
-
-      post 'user', new_user.to_json, headers2
-      last_response.status.should == 201
-      last_response.body.should == user_id
+    it 'this scary evil post' do
+      @user_collection.should_receive(:add).with("{ \"attr\": \"value\" }", {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}).and_return(user_id)
+      post 'user', multipart_stream(:message_json_string), headers2
     end
 
 		it 'adds invalid entity into user collection' do
@@ -193,25 +199,25 @@ describe Datanet::Skel::API_v1 do
 	end
 
   describe 'PUT /:collection_name/:id' do
-    it 'overwites existing user entity' do
+   it 'overwites existing user entity' do
       updated_user = {'first_name' => 'marek', 'age' => 31}
       @user_collection.should_receive(:replace).with(user_id, updated_user)
       .and_raise(entity_not_found_error(user_id))
 
       put "user/#{user_id}", updated_user.to_json, headers
       last_response.status.should == be_ok
-    end
+   end
 
-    it 'overwrites non existing user entity' do
+   it 'overwrites non existing user entity' do
       doc = {'not' => 'important'}
       @user_collection.should_receive(:replace).with(user_id, doc)
       .and_raise(entity_not_found_error(user_id))
 
       put "user/#{user_id}", doc.to_json, headers
       entity_not_found?(user_id)
-    end
+   end
 
-    it 'overwrites existing user entity with not correct values' do
+   it 'overwrites existing user entity with not correct values' do
       update_without_mandatory_param = {'age' => 31}
       @user_collection.should_receive(:replace).with(user_id, update_without_mandatory_param)
       .and_raise(Datanet::Skel::ValidationError.new)
@@ -219,7 +225,7 @@ describe Datanet::Skel::API_v1 do
       put "user/#{user_id}", update_without_mandatory_param.to_json, headers
       last_response.status.should == 422
       # TODO check validation error message
-    end
+   end
   end
 
 	describe 'GET /:collection_name/schema' do

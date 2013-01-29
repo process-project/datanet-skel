@@ -11,11 +11,10 @@ module Datanet
 
       attr_accessor :files, :metadata
 
-      def initialize(env)
-        @env = env
+      def initialize(params)
         @files = Hash.new
         @fields = Hash.new
-        build_object(Rack::Utils::Multipart.parse_multipart(env))
+        build_object(params)
         raise "Metadata not specified" if @metadata.nil?
       end
 

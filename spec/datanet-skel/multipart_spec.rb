@@ -23,7 +23,8 @@ describe Rack::Multipart do
 
   it "parses multipart upload with file #{:message_json_file}" do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_json_file))
-    obj = Datanet::Skel::Multipart.new(env)
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
     obj.files["neighbor"][:payload].should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
     obj.files["neighbor2"][:payload].should == "contents"
@@ -35,7 +36,8 @@ describe Rack::Multipart do
 
   it "parse multipart upload with file #{:message_json_string}" do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_json_string))
-    obj = Datanet::Skel::Multipart.new(env)
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
     obj.files["neighbor"][:payload].should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
     obj.files["neighbor2"].should be_nil
@@ -45,7 +47,8 @@ describe Rack::Multipart do
 
   it "parse multipart upload with file #{:message_meta_attr}" do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_meta_attr))
-    obj = Datanet::Skel::Multipart.new(env)
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
     obj.files["neighbor"][:payload].should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
     obj.files["neighbor2"].should be_nil
@@ -55,7 +58,8 @@ describe Rack::Multipart do
 
   it "parse multipart upload with file #{:message_meta_attr_from_web}" do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_meta_attr_from_web, "---------------------------2984324571314211228785232793"))
-    obj = Datanet::Skel::Multipart.new(env)
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
     obj.files["upfile"][:payload].should == "contents"
     obj.files["upfile"][:filename].should == "plik.txt"
     obj.files["neighbor2"].should be_nil
@@ -67,7 +71,8 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_double_meta))
     caught = false
     begin
-      obj = Datanet::Skel::Multipart.new(env)
+      params = Rack::Utils::Multipart.parse_multipart(env)
+      obj = Datanet::Skel::Multipart.new(params)
     rescue Exception => e
       caught = true
       e.message.should == "Multiple specification of metadata"
@@ -79,7 +84,8 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_no_meta))
     caught = false
     begin
-      obj = Datanet::Skel::Multipart.new(env)
+      params = Rack::Utils::Multipart.parse_multipart(env)
+      obj = Datanet::Skel::Multipart.new(params)
     rescue Exception => e
       caught = true
       e.message.should == "Metadata not specified"
