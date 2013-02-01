@@ -1,5 +1,6 @@
 require 'json-schema'
 require 'delegate'
+require 'datanet-skel/transaction'
 
 module Datanet
   module Skel
@@ -56,18 +57,58 @@ module Datanet
       end
 
       def add(json_doc, files = nil)
-        unless files.nil?
-          files.each do |attr, file|
-            unless json_doc["#{attr}_id"].nil?
-              raise Datanet::Skel::ValidationError.new "File upload conflicts with file reference attribute \'#{attr}\'"
+        Datanet::Skel::Transaction.new.in_transaction do |transaction|
+          unless files.nil?
+            files.each do |attr, file|
+              unless json_doc["#{attr}_id"].nil?
+                raise Datanet::Skel::ValidationError.new "File upload conflicts with metadata attribute \'#{attr}\'"
+              end
+
+              file_upload = Class.new(Datanet::Skel::AtomicAction) do
+                def initialize(transaction, file_storage, payload)
+                  @file_storage = file_storage
+                  @payload = payload
+                  @path = nil
+                  super(transaction)
+                end
+
+                def action
+                  @path = @file_storage.generate_path
+                  @file_storage.store_payload(@payload, @path)
+                end
+
+                def rollback
+                  @file_storage.delete_file(@path) if @path
+                end
+              end.new(transaction, @file_storage, file[:payload])
+              path = file_upload.run_action
+
+              file_to_db = Class.new(Datanet::Skel::AtomicAction) do
+                def initialize(transaction, file_name, path, decorated_mapper)
+                  @file_name = file_name
+                  @path = path
+                  @decorated_mapper = decorated_mapper
+                  @file_id = nil
+                  super(transaction)
+                end
+
+                def action
+                  file_json = { 'file_name' => @file_name, 'file_path' => @path }
+                  @file_id = @decorated_mapper.collection('file').add(file_json)
+                end
+
+                def rollback
+                  @decorated_mapper.collection('file').remove(@file_id) unless @file_id.nil?
+                end
+              end.new(transaction, file[:filename], path, @decorated_mapper)
+
+              json_doc["#{attr}_id"] = file_to_db.run_action
             end
-            path = @file_storage.store_payload(file[:payload])
-            file_json = { 'file_name' => file[:filename] , 'file_path' => path }
-            json_doc["#{attr}_id"] = @decorated_mapper.collection('file').add(file_json)
           end
+
+          valid! json_doc
+          super(json_doc, @inspector.relations)
         end
-        valid! json_doc
-        super(json_doc, @inspector.relations)
       end
 
       def replace(id, json_doc)

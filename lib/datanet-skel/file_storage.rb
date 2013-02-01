@@ -15,8 +15,12 @@ module Datanet
         end
       end
 
-      def store_payload(payload)
-        file_path = "#{@path}/#{generate_name}"
+      def generate_path
+        "#{@path}/#{generate_name}"
+      end
+
+      def store_payload(payload, path = nil)
+        file_path = generate_path if path.nil?
         @conn.in_session do |sftp|
           file = sftp.file.open(file_path, "w")
           file.write(payload)
@@ -24,9 +28,9 @@ module Datanet
         file_path
       end
 
-      def delete_file(path)
+      def delete_file(file_path)
         @conn.in_session do |sftp|
-          sftp.remove!(path)
+          sftp.remove!(file_path)
         end
       end
 

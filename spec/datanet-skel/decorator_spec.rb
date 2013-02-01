@@ -112,7 +112,7 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('with_file').add(valid_entity, files)
-      }.to raise_error(Datanet::Skel::ValidationError, 'File upload conflicts with file reference attribute \'avatar\'')
+      }.to raise_error(Datanet::Skel::ValidationError, 'File upload conflicts with metadata attribute \'avatar\'')
     end
 
     it 'adds valid entity with files' do
@@ -121,7 +121,8 @@ describe Datanet::Skel::EntityDecorator do
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload }}
 
       file_path = "/some/path/on/sftp"
-      file_storage.should_receive(:store_payload).with(payload).and_return(file_path)
+      file_storage.should_receive(:generate_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(payload, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
@@ -134,6 +135,34 @@ describe Datanet::Skel::EntityDecorator do
 
       app('with_file').add(valid_entity, files).should == new_entity_id
     end
+
+    it 'adds one file succesfully but fails on adding second' do
+      valid_entity = {'first_name' => 'marek', 'avatar2_id' => 'this_is_a_cause_of_failure' }
+      payload = 'payload'
+      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload },
+       'avatar2' => { :filename => 'marek_photo2.jpg', :payload => payload }
+      }
+
+      file_path = "/some/path/on/sftp"
+      file_storage.should_receive(:generate_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(payload, file_path).and_return(file_path)
+
+      file_collection = double
+      mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
+
+      file_entity_id = "file11"
+      file_collection.should_receive(:add).and_return(file_entity_id)
+
+      # on rollback
+      mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
+      file_collection.should_receive(:remove).with(file_entity_id)
+      file_storage.should_receive(:delete_file)
+
+      expect{
+        app('with_file').add(valid_entity, files)
+      }.to raise_error
+    end
+
   end
 
   describe 'replace entity' do

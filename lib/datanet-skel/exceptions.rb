@@ -4,5 +4,6 @@ module Skel
   class EntityNotFoundException < Exception; end
   class ValidationError < Exception; end
   class WrongModelLocationError < Exception; end
+  class ActionFailedException < Exception; end
 end
 end
