@@ -4,7 +4,7 @@ module Datanet
   module Skel
     class SftpConnection
 
-      attr_accessor :sftp_user
+      attr_accessor :sftp_host, :sftp_user, :sftp_password
 
       def initialize(sftp_host, sftp_user, sftp_password)
         @sftp_host = sftp_host
@@ -19,13 +19,6 @@ module Datanet
       end
 
     private
-
-      def prepare_directory
-        @sftp.opendir() do |response|
-          response.ok? == false
-          @sftp.mkdir!(@path)
-        end
-      end
 
       def start_session!
         if @ssh.nil?

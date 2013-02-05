@@ -6,25 +6,26 @@ module Datanet
   module Skel
     class FileStorage
 
-      def initialize(sftp_connection, path_prefix = "/mnt/auto/people", folder_name = ".datanet")
-        @conn = sftp_connection
-        base_path = "#{path_prefix}/#{@conn.sftp_user}"
-        @path = "#{base_path}/#{folder_name}"
-        @conn.in_session do |sftp|
-          prepare_datanet_dir(sftp, @path, base_path, folder_name)
-        end
+      def initialize(path_prefix = "/mnt/auto/people", folder_name = ".datanet")
+        @path_prefix = path_prefix
+        @folder_name = folder_name
       end
 
-      def generate_path
-        "#{@path}/#{generate_name}"
+      def generate_path conn
+        datanet_dir = "#{@path_prefix}/#{conn.sftp_user}/#{@folder_name}"
+        "#{datanet_dir}/#{generate_name}"
       end
 
-      def store_payload(payload, path = nil)
-        file_path = generate_path if path.nil?
-        @conn.in_session do |sftp|
+      def store_payload(conn, payload, path = nil)
+        user_base = "#{@path_prefix}/#{conn.sftp_user}"
+        file_path = generate_path conn if path.nil?
+
+        conn.in_session do |sftp|
+          prepare_datanet_dir(sftp, user_base)
           file = sftp.file.open(file_path, "w")
           file.write(payload)
         end
+
         file_path
       end
 
@@ -34,19 +35,19 @@ module Datanet
         end
       end
 
-    private
+      private
 
       # TODO insecure method - file may exist
       def generate_name
         uuid = SecureRandom.uuid
       end
 
-      def prepare_datanet_dir(sftp, path, base_path, folder_name)
+      def prepare_datanet_dir(sftp, user_base)
         existing = false
-        sftp.dir.glob(base_path, folder_name) do |entry|
+        sftp.dir.glob(user_base, @folder_name) do |entry|
           existing = true
         end
-        sftp.mkdir!(path) unless existing
+        sftp.mkdir!("#{user_base}/#{@folder_name}") unless existing
       end
 
     end

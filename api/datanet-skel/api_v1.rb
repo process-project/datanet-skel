@@ -1,5 +1,7 @@
 require 'datanet-skel/exceptions'
 require 'datanet-skel/multipart'
+require 'datanet-skel/file_transmition'
+require 'datanet-skel/sftp_connection'
 
 module Datanet
   module Skel
@@ -28,12 +30,15 @@ module Datanet
 
       helpers do
 
+        def storage_host
+          API.storage_host
+        end
+
         def mapper
           API.mapper
         end
 
         def doc!
-
           if @request.form_data?
             form_data.metadata
           else
@@ -41,8 +46,17 @@ module Datanet
           end
         end
 
-        def files
-          @request.form_data? ? form_data.files : nil
+        def new_sftp_connection
+          user, password = Rack::Auth::Basic::Request.new(env).credentials
+          Datanet::Skel::SftpConnection.new(storage_host, user, password)
+        end
+
+        def file_transmition
+          if @request.form_data?
+            Datanet::Skel::FileTransmition.new(new_sftp_connection, form_data.files)
+          else
+            nil
+          end
         end
 
         def collection
@@ -101,7 +115,7 @@ module Datanet
         end
         post ":collection_name" do
           logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
-          collection.add(doc!, files)
+          collection.add(doc!, file_transmition)
         end
 
         desc "Get entity schema"

@@ -1,22 +1,31 @@
 require 'spec_helper'
 require 'base64'
+require 'datanet-skel/file_transmition'
 
 describe Datanet::Skel::API_v1 do
 	include Rack::Test::Methods
 
 	def app
 		Datanet::Skel::API
-	end
+  end
+
+  def test_username
+    "test_username"
+  end
+
+  def test_password
+    "test_password"
+  end
 
   def headers(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
-     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
+     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("#{test_username}:#{test_password}"),
      'CONTENT_TYPE' => "application/json"}.merge(options)
   end
 
   def headers_multipart(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
-     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("test_username:test_password"),
+     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("#{test_username}:#{test_password}"),
      'CONTENT_TYPE' => "multipart/form-data; boundary=AaB03x",
     }.merge(options)
   end
@@ -113,15 +122,6 @@ describe Datanet::Skel::API_v1 do
       last_response.body.should == user_id
     end
 
-    it 'this scary evil post' do
-      @user_collection.should_receive(:add).with("{ \"attr\": \"value\" }",
-        {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}).and_return(user_id)
-
-      post 'user', multipart_stream(:message_json_string), headers_multipart
-      last_response.status.should == 201
-      last_response.body.should == user_id
-    end
-
 		it 'adds invalid entity into user collection' do
 			new_user = {'first_name' => 'marek'}
 			@user_collection.should_receive(:add).with(new_user, nil)
@@ -130,7 +130,21 @@ describe Datanet::Skel::API_v1 do
 			post 'user', new_user.to_json, headers
 			last_response.status.should == 422
 			# TODO check validation error message
-		end
+    end
+
+    it 'adds entity with files' do
+      @user_collection.should_receive(:add) do |arg1, arg2|
+        arg1.should eq "{ \"attr\": \"value\" }"
+        arg2.sftp_connection.sftp_host.should == app.storage_host
+        arg2.sftp_connection.sftp_user.should == test_username
+        arg2.sftp_connection.sftp_password.should == test_password
+        arg2.files.should == {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}
+        user_id
+      end
+      post 'user', multipart_stream(:message_json_string), headers_multipart
+      last_response.status.should == 201
+      last_response.body.should == user_id
+    end
 	end
 
 	describe 'GET /:collection_name/:id' do

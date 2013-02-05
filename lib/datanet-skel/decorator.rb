@@ -1,14 +1,14 @@
 require 'json-schema'
 require 'delegate'
 require 'datanet-skel/transaction'
+require 'datanet-skel/file_storage'
 
 module Datanet
   module Skel
     class MapperDecorator < SimpleDelegator
       attr_accessor :model_location
 
-      def initialize(obj, file_storage)
-        @file_storage = file_storage
+      def initialize(obj)
         super(obj)
       end
 
@@ -27,9 +27,13 @@ module Datanet
         collections.sort!
       end
 
+      def file_storage
+        @file_storage ||= Datanet::Skel::FileStorage.new
+      end
+
       def collection(entity_type)
         path = entity_path!(entity_type)
-        EntityDecorator.new(super, path, @file_storage, self)
+        EntityDecorator.new(super, path, file_storage, self)
       end
 
     private
@@ -47,40 +51,41 @@ module Datanet
     end
 
     class EntityDecorator < SimpleDelegator
+
       def initialize(obj, model_path, file_storage, decorated_mapper)
         @model_path = model_path
         @file_storage = file_storage
         @decorated_mapper = decorated_mapper
         @inspector = Datanet::Skel::RelationInspector.new(model_path)
-
         super(obj)
       end
 
-      def add(json_doc, files = nil)
+      def add(json_doc, file_transmission = nil)
         Datanet::Skel::Transaction.new.in_transaction do |transaction|
-          unless files.nil?
-            files.each do |attr, file|
+          unless file_transmission.nil? ||  file_transmission.files.nil?
+            file_transmission.files.each do |attr, file|
+
               unless json_doc["#{attr}_id"].nil?
                 raise Datanet::Skel::ValidationError.new "File upload conflicts with metadata attribute \'#{attr}\'"
               end
 
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
-                def initialize(transaction, file_storage, payload)
+                def initialize(transaction, file_storage, sftp_connection, payload)
                   @file_storage = file_storage
+                  @sftp_connection = sftp_connection
                   @payload = payload
                   @path = nil
                   super(transaction)
                 end
-
                 def action
-                  @path = @file_storage.generate_path
-                  @file_storage.store_payload(@payload, @path)
+                  @path = @file_storage.generate_path @sftp_connection
+                  @file_storage.store_payload(@sftp_connection, @payload, @path)
                 end
-
                 def rollback
-                  @file_storage.delete_file(@path) if @path
+                  @file_storage.delete_file(@sftp_connection, @path) if @path
                 end
-              end.new(transaction, @file_storage, file[:payload])
+              end.new(transaction, @file_storage, file_transmission.sftp_connection, file[:payload])
+
               path = file_upload.run_action
 
               file_to_db = Class.new(Datanet::Skel::AtomicAction) do
@@ -91,12 +96,10 @@ module Datanet
                   @file_id = nil
                   super(transaction)
                 end
-
                 def action
                   file_json = { 'file_name' => @file_name, 'file_path' => @path }
                   @file_id = @decorated_mapper.collection('file').add(file_json)
                 end
-
                 def rollback
                   @decorated_mapper.collection('file').remove(@file_id) unless @file_id.nil?
                 end

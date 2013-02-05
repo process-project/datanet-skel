@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'datanet-skel/exceptions'
+require 'datanet-skel/file_transmition'
 
 describe Datanet::Skel::MapperDecorator do
 
@@ -12,7 +13,7 @@ describe Datanet::Skel::MapperDecorator do
   end
 
   def app
-    app = Datanet::Skel::MapperDecorator.new(mapper, file_storage)
+    app = Datanet::Skel::MapperDecorator.new(mapper)
     app.model_location = @model_location
     app
   end
@@ -74,6 +75,10 @@ describe Datanet::Skel::EntityDecorator do
     @mapper_decorator ||= double
   end
 
+  def connection
+    @connection ||= double
+  end
+
   def app model_name
     Datanet::Skel::EntityDecorator.new(entity, model_path(model_name), file_storage, mapper_decorator)
   end
@@ -110,8 +115,10 @@ describe Datanet::Skel::EntityDecorator do
       valid_entity = {'first_name' => 'marek', 'avatar_id' => 'this_is_a_cause_of_failure' }
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => '' }}
 
+      file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
+
       expect {
-        app('with_file').add(valid_entity, files)
+        app('with_file').add(valid_entity, file_transmition)
       }.to raise_error(Datanet::Skel::ValidationError, 'File upload conflicts with metadata attribute \'avatar\'')
     end
 
@@ -119,10 +126,11 @@ describe Datanet::Skel::EntityDecorator do
       valid_entity = {'first_name' => 'marek'}
       payload = 'payload'
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload }}
+      file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(payload, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(connection, payload, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
@@ -133,7 +141,7 @@ describe Datanet::Skel::EntityDecorator do
       new_entity_id = "id_123"
       entity.should_receive(:add).with(valid_entity, {'avatar_id'=>'file'}).and_return(new_entity_id)
 
-      app('with_file').add(valid_entity, files).should == new_entity_id
+      app('with_file').add(valid_entity, file_transmition).should == new_entity_id
     end
 
     it 'adds one file succesfully but fails on adding second' do
@@ -142,10 +150,11 @@ describe Datanet::Skel::EntityDecorator do
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload },
        'avatar2' => { :filename => 'marek_photo2.jpg', :payload => payload }
       }
+      file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(payload, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(connection, payload, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
@@ -159,7 +168,7 @@ describe Datanet::Skel::EntityDecorator do
       file_storage.should_receive(:delete_file)
 
       expect{
-        app('with_file').add(valid_entity, files)
+        app('with_file').add(valid_entity, file_transmition)
       }.to raise_error
     end
 
