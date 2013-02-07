@@ -24,6 +24,10 @@ module Datanet
         Rack::Response.new([e.message], 422)
       end
 
+      rescue_from Datanet::Skel::FileStorageException do |e|
+        Rack::Response.new([e.message], 422)
+      end
+
       http_basic do |user,password|
         API.auth ? API.auth.authenticate(user, password) : true
       end

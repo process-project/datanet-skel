@@ -28,7 +28,7 @@ describe Datanet::Skel::Transaction do
         end.new(transaction)
 
         atomic3.should_receive(:rollback).exactly(0)
-        atomic3.should_receive(:action).exactly(1).and_raise(Datanet::Skel::ActionFailedException.new("Fail message"))
+        atomic3.should_receive(:action).exactly(1).and_raise("fail message")
 
         atomic1.run_action.should == :a
         atomic2.run_action.should == :b
@@ -74,7 +74,7 @@ describe Datanet::Skel::Transaction do
 
         atomic2 = Class.new(Datanet::Skel::AtomicAction) do
           def action
-            raise Datanet::Skel::ActionFailedException.new("this raises exception")
+            raise "this raises exception"
           end
           def rollback
             "this will not be rolled back"

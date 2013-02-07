@@ -2,6 +2,7 @@ require 'json-schema'
 require 'delegate'
 require 'datanet-skel/transaction'
 require 'datanet-skel/file_storage'
+require 'datanet-skel/exceptions'
 
 module Datanet
   module Skel
@@ -61,6 +62,7 @@ module Datanet
       end
 
       def add(json_doc, file_transmission = nil)
+
         Datanet::Skel::Transaction.new.in_transaction do |transaction|
           unless file_transmission.nil? ||  file_transmission.files.nil?
             file_transmission.files.each do |attr, file|
@@ -80,6 +82,8 @@ module Datanet
                 def action
                   @path = @file_storage.generate_path @sftp_connection
                   @file_storage.store_payload(@sftp_connection, @payload, @path)
+                rescue Exception => e
+                  raise Datanet::Skel::FileStorageException.new(e)
                 end
                 def rollback
                   @file_storage.delete_file(@sftp_connection, @path) if @path
@@ -112,6 +116,7 @@ module Datanet
           valid! json_doc
           super(json_doc, @inspector.relations)
         end
+
       end
 
       def replace(id, json_doc)
