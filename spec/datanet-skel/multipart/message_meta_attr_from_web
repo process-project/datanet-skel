@@ -1,0 +1,10 @@
+-----------------------------2984324571314211228785232793
+Content-Disposition: form-data; name="upfile"; filename="plik.txt"
+Content-Type: application/octet-stream
+
+contents
+-----------------------------2984324571314211228785232793
+Content-Disposition: form-data; name="note"
+
+note1
+-----------------------------2984324571314211228785232793--

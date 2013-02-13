@@ -35,67 +35,11 @@ module Datanet
         [true, parse_response(response, "token")]
       end
 
-      # Not only authenticates the user with the PLGrid Portal but also retrieves all user data to populate the locel DB
-      # Returns: [is_ok, content]
-      #   - if is_ok (the user auth is a success), user == the 'resource', the new user object in the model
-      #   - if !is_ok,  content is either nil or the error message
-      def full_plgrid_portal_check(login, password)
-        is_ok, response = plgrid_portal_auth(login, password)
-        return [false,response] unless is_ok
-
-        user = update_user_info_from_portal(login, response)
-        return [false,nil] if user.nil?
-
-        [true, user]
-      end
-
-
-      # Given a valid portal token, contacts the portal in order to retrieve user details and populate with it the local DB.
-      # If the user does not exist, it creates one with the retrieved data, otherwise it updates user's fields in DB.
-      # Returns the user record in DB or nil if both no previous user record was found locally and the portal does not respond with the data.
-      def update_user_info_from_portal(login, token)
-        # TG: sleep might be useful for testing portal token timeout
-        #sleep 200
-
-        status, response = do_https("#{full_portal_endpoint}userdata/#{token}")
-
-        # If we can't get to portal for some reason, we try to work with what we have now in local DB
-        unless status
-          logger.warn "[PortalAuth] Problem with retrieval of user data from Portal. Code (#{response.code}). Trying to rely on local DB for now."
-          return User.find_by_login(login)
-        end
-
-        # The structure of user data returned from Portal:
-
-        #<userData>
-        #  <login>plggubala</login>
-        #  <name>Tomasz</name>
-        #  <surname>Gubala</surname>
-        #  <email>plggubala@email.com</email>
-        #<teams><group><name>MAPPER</name><systemGroup>plggmapper</systemGroup><status>ACTIVE</status><leader>false</leader></group><group><name>MultiSCaLE Application Developers</name><systemGroup>plggmuscle</systemGroup><status>ACTIVE</status><leader>false</leader></group><group><name>siRNA</name><systemGroup>plggsirna</systemGroup><status>ACTIVE</status><leader>true</leader></group></teams>
-        #</userData>
-
-        main_data = response.body[/userData.*<\/email>/]
-        user_data = {
-          :login => get_xml_content(main_data, "login"),
-          :name => get_xml_content(main_data, "name"),
-          :surname => get_xml_content(main_data, "surname"),
-          :email => get_xml_content(main_data, "email")
-        }
-
-        logger.debug "[PortalAuth] Retrived full data of (#{authentication_hash[:login]}): #{user_data}."
-        user = User.where(:login => login).first_or_create(user_data)
-        user.update_attributes(user_data)
-        user
-      end
-
-
       # Assumes the response is a correct HTTPSuccess body message.
       # Returns the XML element body for 'word' element name
       def parse_response(response, word)
         get_xml_content(response.body.to_s, word)
       end
-
 
       # Tests if the Portal responsed with HTTPSuccess and if the operation itself was successful (the status attribute == "OK")
       # Returns: [is_ok, value]
@@ -122,7 +66,6 @@ module Datanet
         end
         [true,nil]
       end
-
 
       def get_xml_content(body, marker)
         return nil if !body.include? marker
@@ -182,9 +125,6 @@ module Datanet
         # TG: wrong API endpoint shared key
         #Integromics::Application.config.plgrid_portal_base_url + PORTAL_SHARED_KEY[5,5] + "/"
 
-        # TG: the correct value for production
-        #Integromics::Application.config.plgrid_portal_base_url + PORTAL_SHARED_KEY + "/"
-        #PORTAL_BASE_URL + PORTAL_SHARED_KEY + "/"
         @portal_base_url + @portal_shared_key + "/"
       end
 

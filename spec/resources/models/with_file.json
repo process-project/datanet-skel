@@ -1,0 +1,16 @@
+{
+    "type": "object",
+    "properties": {
+        "first_name": {"type": "string", "required": true},
+        "attachment_id"    : {"type": "string", "required": false}
+    },
+
+    "links": [
+        { "rel" :"attachment",
+            "href":"/entity/file/{attachment_id}",
+            "targetSchema":"file"
+        }
+    ]
+}
+
+

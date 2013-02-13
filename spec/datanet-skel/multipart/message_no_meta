@@ -1,0 +1,8 @@
+--AaB03x
+Content-Disposition: form-data; name="neighbor"; filename="picture.jpg"
+Content-Type: image/jpeg
+Content-Transfer-Encoding: binary
+
+contents
+--AaB03x--
+
