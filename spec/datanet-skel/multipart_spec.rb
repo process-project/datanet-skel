@@ -93,4 +93,13 @@ describe Rack::Multipart do
     caught.should == true
   end
 
+  it "parse multipart upload with file #{:message_no_files}" do
+    env = Rack::MockRequest.env_for("/", multipart_fixture(:message_no_files))
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
+    obj.files.should be_nil
+    obj.metadata.should_not be_nil
+    obj.metadata.should eq ({ "attr1" => "value1", "attr2" => "value2" }.to_json)
+  end
+
 end

@@ -134,7 +134,7 @@ describe Datanet::Skel::API_v1 do
 
     it 'adds entity with files' do
       @user_collection.should_receive(:add) do |arg1, arg2|
-        arg1.should eq "{ \"attr\": \"value\" }"
+        arg1["attr"].should == "value"
         arg2.sftp_connection.sftp_host.should == app.storage_host
         arg2.sftp_connection.sftp_user.should == test_username
         arg2.sftp_connection.sftp_password.should == test_password
@@ -145,6 +145,7 @@ describe Datanet::Skel::API_v1 do
       last_response.status.should == 201
       last_response.body.should == user_id
     end
+
 	end
 
 	describe 'GET /:collection_name/:id' do

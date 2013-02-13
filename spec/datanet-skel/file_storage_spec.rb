@@ -80,8 +80,20 @@ describe Datanet::Skel::FileStorage do
 
   end
 
+  #it "saves file" do
+  #  conn = Datanet::Skel::SftpConnection.new("zeus.cyfronet.pl", TestSettings.myuser, TestSettings.mypass)
+  #  storage = Datanet::Skel::FileStorage.new()
+  #
+  #  path = storage.generate_path conn
+  #  storage.store_payload(conn, "dasdasdasda", path)
+  #  storage.delete_file(conn, path)
+  #end
+
 end
 
+
+
+#
 #require 'net/sftp'
 #
 #describe "SFTP" do

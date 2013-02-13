@@ -12,7 +12,7 @@ module Datanet
       attr_accessor :files, :metadata
 
       def initialize(params)
-        @files = Hash.new
+        @files = nil
         @fields = Hash.new
         build_object(params)
         raise "Metadata not specified" if @metadata.nil?
@@ -59,6 +59,7 @@ module Datanet
       end
 
       def set_file key, file_data
+        @files ||= Hash.new
         raise "Multiple specification of file '#{key}'" unless @files[key].nil?
         @files[key] = file_data
       end

@@ -18,7 +18,7 @@ module Datanet
 
       def store_payload(conn, payload, path = nil)
         user_base = "#{@path_prefix}/#{conn.sftp_user}"
-        file_path = generate_path conn if path.nil?
+        file_path = path.nil? ? generate_path(conn) : path
 
         conn.in_session do |sftp|
           prepare_datanet_dir(sftp, user_base)
@@ -29,8 +29,8 @@ module Datanet
         file_path
       end
 
-      def delete_file(file_path)
-        @conn.in_session do |sftp|
+      def delete_file(conn, file_path)
+        conn.in_session do |sftp|
           sftp.remove!(file_path)
         end
       end

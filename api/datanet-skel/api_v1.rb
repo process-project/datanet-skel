@@ -8,6 +8,7 @@ module Datanet
     class API_v1 < Grape::API
       version 'v1', :using => :header, :vendor => 'datanet'
 
+      format :json
       default_format :json
       content_type :json, "application/json"
       content_type :multipart, "multipart/form-data"
@@ -44,7 +45,7 @@ module Datanet
 
         def doc!
           if @request.form_data?
-            form_data.metadata
+            JSON.parse(form_data.metadata)
           else
             JSON.parse(env['rack.input'].string)
           end
@@ -56,7 +57,7 @@ module Datanet
         end
 
         def file_transmition
-          if @request.form_data?
+          if @request.form_data? && form_data.files
             Datanet::Skel::FileTransmition.new(new_sftp_connection, form_data.files)
           else
             nil
@@ -76,8 +77,7 @@ module Datanet
         end
 
         def form_data
-          # provided by MultipartParser
-          @multipart_form_data ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"])
+          params[:multipart_form_data] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"])
         end
 
         def logger

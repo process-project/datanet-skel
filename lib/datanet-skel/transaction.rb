@@ -24,6 +24,8 @@ module Datanet
         rescue Exception => e
           # TODO log action failure - puts "Action failed: #{e.message}"
           # TODO rethink error handling mechanism (rollback in any case or just in case of specific exception)
+          puts e
+
           rollback
           raise e
         end

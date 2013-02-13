@@ -139,7 +139,7 @@ describe Datanet::Skel::EntityDecorator do
       file_collection.should_receive(:add).and_return(file_id)
 
       new_entity_id = "id_123"
-      entity.should_receive(:add).with(valid_entity, {'avatar_id'=>'file'}).and_return(new_entity_id)
+      entity.should_receive(:add).with(valid_entity, {'attachment_id'=>'file'}).and_return(new_entity_id)
 
       app('with_file').add(valid_entity, file_transmition).should == new_entity_id
     end
