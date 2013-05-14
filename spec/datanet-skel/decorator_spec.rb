@@ -108,7 +108,7 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').add(not_valid_user)
-      }.to raise_error(Datanet::Skel::ValidationError)
+      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/' did not contain a required property of 'last_name'")
     end
 
     it 'throws exception when adding a file together with metadata file reference attribute' do
@@ -200,7 +200,7 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').replace(user_id, not_valid_updated_user)
-      }.to raise_error(Datanet::Skel::ValidationError)
+      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/' did not contain a required property of 'last_name'")
     end
 
     it 'throws exception while entity not found exception' do
@@ -249,7 +249,7 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').update(user_id, wrong_updated_values)
-      }.to raise_error(Datanet::Skel::ValidationError)
+      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/first_name' of type NilClass did not match the following type: string")
     end
   end
 
