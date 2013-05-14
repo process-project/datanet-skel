@@ -21,6 +21,10 @@ module Datanet
         rack_response({:message => e.message}.to_json, 404)
       end
 
+      rescue_from Datanet::Skel::EntityAttributeNotFoundException do |e|
+        rack_response({:message => e.message}.to_json, 404)
+      end
+
       rescue_from Datanet::Skel::ValidationError do |e|
         Rack::Response.new([e.message], 422)
       end
@@ -84,6 +88,10 @@ module Datanet
           API.logger
         end
 
+        def attribute_not_found
+          raise EntityAttributeNotFoundException.new "Attribute #{params[:attr_name]} not found in #{id} #{params[:collection_name]} entity"
+        end
+
         def halt_on_empty!(obj, status, message)
           if obj.nil?
             halt status, message
@@ -138,6 +146,18 @@ module Datanet
         get ":collection_name/:id" do
            logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
            entity!
+        end
+
+        desc "Get entity attribute with given id"
+        params do
+          requires :collection_name, :desc => 'Collection name'
+          requires :id, :desc => "Entity id"
+          requires :attr_name, :desc => "Attribute name"
+        end
+        get ":collection_name/:id/:attr_name" do
+           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}//#{params[:attr_name]}"
+           attr_value = entity![params[:attr_name]]
+           attr_value ? attr_value : attribute_not_found()
         end
 
         desc "Delete entity with given id"
