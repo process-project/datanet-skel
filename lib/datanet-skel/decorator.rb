@@ -144,6 +144,8 @@ module Datanet
       def valid!(json_doc)
         begin
           JSON::Validator.validate!(@model_path, json_doc)
+        rescue JSON::Schema::ValidationError
+          raise Datanet::Skel::ValidationError.new $!.message[0, $!.message.index(' in schema')]
         rescue
           raise Datanet::Skel::ValidationError.new 'Wrong json format'
         end

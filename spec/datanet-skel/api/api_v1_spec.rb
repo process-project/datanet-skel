@@ -172,6 +172,27 @@ describe Datanet::Skel::API_v1 do
     end
   end
 
+  describe 'GET /:collection_name/:id/:attr_name' do
+    it 'gets existing user entity attribute' do
+      user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:get).with(user_id).and_return(user)
+
+      get "user/#{user_id}/first_name", nil, headers
+      last_response.status.should == be_ok
+      last_response.body.should == 'marek'
+    end
+
+    it 'gets non existing user entity attribute' do
+      user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:get).with(user_id).and_return(user)
+
+      get "user/#{user_id}/non_existing", nil, headers
+      last_response.status.should == 404
+      JSON.parse(last_response.body).should ==
+        {'message' => "Attribute non_existing not found in #{user_id} user entity"}
+    end
+  end
+
 	describe 'DELETE /:collection_name/:id' do
 		it 'deletes existing user entity' do
 			@user_collection.should_receive(:remove).with(user_id)
