@@ -25,9 +25,9 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_json_file))
     params = Rack::Utils::Multipart.parse_multipart(env)
     obj = Datanet::Skel::Multipart.new(params)
-    obj.files["neighbor"][:payload].should == "contents"
+    obj.files["neighbor"][:payload_stream].read.should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
-    obj.files["neighbor2"][:payload].should == "contents"
+    obj.files["neighbor2"][:payload_stream].read.should == "contents"
     obj.files["neighbor2"][:filename].should == "picture2.jpg"
     obj.files["neighbor3"].should be_nil
     obj.metadata.should_not be_nil
@@ -38,7 +38,7 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_json_string))
     params = Rack::Utils::Multipart.parse_multipart(env)
     obj = Datanet::Skel::Multipart.new(params)
-    obj.files["neighbor"][:payload].should == "contents"
+    obj.files["neighbor"][:payload_stream].read.should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
     obj.files["neighbor2"].should be_nil
     obj.metadata.should_not be_nil
@@ -49,7 +49,7 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_meta_attr))
     params = Rack::Utils::Multipart.parse_multipart(env)
     obj = Datanet::Skel::Multipart.new(params)
-    obj.files["neighbor"][:payload].should == "contents"
+    obj.files["neighbor"][:payload_stream].read.should == "contents"
     obj.files["neighbor"][:filename].should == "picture.jpg"
     obj.files["neighbor2"].should be_nil
     obj.metadata.should_not be_nil
@@ -60,7 +60,7 @@ describe Rack::Multipart do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_meta_attr_from_web, "---------------------------2984324571314211228785232793"))
     params = Rack::Utils::Multipart.parse_multipart(env)
     obj = Datanet::Skel::Multipart.new(params)
-    obj.files["upfile"][:payload].should == "contents"
+    obj.files["upfile"][:payload_stream].read.should == "contents"
     obj.files["upfile"][:filename].should == "plik.txt"
     obj.files["neighbor2"].should be_nil
     obj.metadata.should_not be_nil

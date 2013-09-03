@@ -124,13 +124,16 @@ describe Datanet::Skel::EntityDecorator do
 
     it 'adds valid entity with files' do
       valid_entity = {'first_name' => 'marek'}
-      payload = 'payload'
-      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload }}
+
+      payload = double
+      payload.should_receive(:read).twice.and_return('payload')
+
+      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload }}
       file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(connection, payload, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(connection, payload.read, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
@@ -146,15 +149,18 @@ describe Datanet::Skel::EntityDecorator do
 
     it 'adds one file succesfully but fails on adding second' do
       valid_entity = {'first_name' => 'marek', 'avatar2_id' => 'this_is_a_cause_of_failure' }
-      payload = 'payload'
-      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => payload },
-       'avatar2' => { :filename => 'marek_photo2.jpg', :payload => payload }
+
+      payload = double
+      payload.should_receive(:read).exactly(2).times.and_return('payload')
+
+      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload },
+       'avatar2' => { :filename => 'marek_photo2.jpg', :payload_stream => payload }
       }
       file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(connection, payload, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(connection, payload.read, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)

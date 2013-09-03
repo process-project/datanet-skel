@@ -35,6 +35,18 @@ module Datanet
         end
       end
 
+      CHUNK_SIZE = 100024
+
+      def get_file(conn, file_path)
+        payload = nil
+        conn.in_session do |sftp|
+          file = sftp.file.open(file_path, "r")
+          payload = file.read(CHUNK_SIZE) # TODO - use stream, read whole file
+          file.close
+        end
+        payload
+      end
+
       private
 
       # TODO insecure method - file may exist

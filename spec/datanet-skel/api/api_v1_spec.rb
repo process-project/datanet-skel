@@ -6,6 +6,7 @@ describe Datanet::Skel::API_v1 do
 	include Rack::Test::Methods
 
 	def app
+    Datanet::Skel::API.auth_storage ||= double
 		Datanet::Skel::API
   end
 
@@ -133,12 +134,16 @@ describe Datanet::Skel::API_v1 do
     end
 
     it 'adds entity with files' do
+
       @user_collection.should_receive(:add) do |arg1, arg2|
         arg1["attr"].should == "value"
         arg2.sftp_connection.sftp_host.should == app.storage_host
         arg2.sftp_connection.sftp_user.should == test_username
         arg2.sftp_connection.sftp_password.should == test_password
-        arg2.files.should == {"neighbor"=>{:filename=>"picture.jpg", :payload=>"contents"}}
+        neigh = arg2.files["neighbor"]
+        neigh.should_not be_nil
+        neigh[:filename].should == "picture.jpg"
+        neigh[:payload_stream].read.should == "contents"
         user_id
       end
       post 'user', multipart_stream(:message_json_string), headers_multipart
@@ -146,26 +151,26 @@ describe Datanet::Skel::API_v1 do
       last_response.body.should == user_id
     end
 
-	end
+  end
 
-	describe 'GET /:collection_name/:id' do
-		it 'gets existing user entity' do
-			user = {'first_name' => 'marek', 'age' => 31}
-			@user_collection.should_receive(:get).with(user_id).and_return(user)
+  describe 'GET /:collection_name/:id' do
+    it 'gets existing user entity' do
+      user = {'first_name' => 'marek', 'age' => 31}
+      @user_collection.should_receive(:get).with(user_id).and_return(user)
 
-			get "user/#{user_id}", nil, headers
-			last_response.status.should == be_ok
-			JSON.parse(last_response.body).should == user
-		end
+      get "user/#{user_id}", nil, headers
+      last_response.status.should == be_ok
+      JSON.parse(last_response.body).should == user
+    end
 
-		it 'gets non existing user entity' do
-			@user_collection.should_receive(:get).with(user_id)
-				.and_raise(entity_not_found_error(user_id))
+    it 'gets non existing user entity' do
+      @user_collection.should_receive(:get).with(user_id)
+      .and_raise(entity_not_found_error(user_id))
 
-			get "user/#{user_id}", nil, headers
-			entity_not_found?(user_id)
-		end
-	end
+      get "user/#{user_id}", nil, headers
+      entity_not_found?(user_id)
+    end
+  end
 
 	describe 'DELETE /:collection_name/:id' do
 		it 'deletes existing user entity' do

@@ -32,9 +32,9 @@ module Datanet
         params.each do |attr, value|
           next if attr == "metadata"
           if value.instance_of? Hash
-            payload = value.has_key?(:tempfile) ? value[:tempfile].read : ""       # TODO - pass stream
+            payload_stream = value.has_key?(:tempfile) ? value[:tempfile] : nil
             filename = value.has_key?(:filename) ? value[:filename] : ""
-            set_file attr, { :filename => filename, :payload => payload }
+            set_file attr, { :filename => filename, :payload_stream => payload_stream}
           elsif value.instance_of? String
             set_field attr, value
           end

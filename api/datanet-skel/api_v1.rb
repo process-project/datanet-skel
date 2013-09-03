@@ -26,7 +26,7 @@ module Datanet
       end
 
       rescue_from Datanet::Skel::FileStorageException do |e|
-        Rack::Response.new([e.message], 422)
+        Rack::Response.new([ "File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
       end
 
       http_basic do |user,password|
@@ -44,24 +44,26 @@ module Datanet
         end
 
         def doc!
-          if @request.form_data?
+          if form_data
             JSON.parse(form_data.metadata)
           else
             JSON.parse(env['rack.input'].string)
           end
         end
 
+        def form_data
+          params[:datanet_form_multipart] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"]) if
+              @request.form_data? && env["rack.request.form_hash"]
+        end
+
         def new_sftp_connection
+          raise Datanet::Skel::FileStorageException.new("File storage authentication is disabled for this repository.") unless API.auth_storage
           user, password = Rack::Auth::Basic::Request.new(env).credentials
           Datanet::Skel::SftpConnection.new(storage_host, user, password)
         end
 
         def file_transmition
-          if @request.form_data? && form_data.files
-            Datanet::Skel::FileTransmition.new(new_sftp_connection, form_data.files)
-          else
-            nil
-          end
+          Datanet::Skel::FileTransmition.new(new_sftp_connection, form_data.files) if form_data && form_data.files
         end
 
         def collection
@@ -69,15 +71,19 @@ module Datanet
         end
 
         def entity!
-          collection.get id
+            collection.get id
+        end
+
+        def file!
+          collection.get_file id, new_sftp_connection if file_request
         end
 
         def id
           params[:id]
         end
 
-        def form_data
-          params[:multipart_form_data] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"])
+        def file_request
+          params[:collection_name] == 'file'
         end
 
         def logger
@@ -98,8 +104,8 @@ module Datanet
         mapper.collections or []
       end
 
-       desc "Model entities."
-       resource '/' do
+      desc "Model entities."
+      resource '/' do
 
         desc "Get all ids of the elements stored in this Entity"
         params do
@@ -136,8 +142,15 @@ module Datanet
           requires :id, :desc => "Entity id"
         end
         get ":collection_name/:id" do
-           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
-           entity!
+          logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
+          if file_request
+            payload, file_name = file!
+            header "Content-Type", "application/octet-stream"
+            header "Content-Disposition", "attachment;filename=\"#{file_name}\""
+            payload
+          else
+            entity!
+          end
         end
 
         desc "Delete entity with given id"

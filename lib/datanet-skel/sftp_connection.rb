@@ -13,9 +13,14 @@ module Datanet
       end
 
       def in_session
-        start_session!
-        yield @sftp
-        close_session!
+        begin
+          start_session!
+          yield @sftp
+        rescue Exception => e
+          raise e
+        ensure
+          close_session!
+        end
       end
 
     private

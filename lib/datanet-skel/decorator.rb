@@ -34,7 +34,11 @@ module Datanet
 
       def collection(entity_type)
         path = entity_path!(entity_type)
-        EntityDecorator.new(super, path, file_storage, self)
+        if entity_type == 'file'
+          FileEntityDecorator.new(super, path, file_storage, self)
+        else
+          EntityDecorator.new(super, path, file_storage, self)
+        end
       end
 
     private
@@ -72,23 +76,23 @@ module Datanet
               end
 
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
-                def initialize(transaction, file_storage, sftp_connection, payload)
+                def initialize(transaction, file_storage, sftp_connection, payload_stream)
                   @file_storage = file_storage
                   @sftp_connection = sftp_connection
-                  @payload = payload
+                  @payload_stream = payload_stream
                   @path = nil
                   super(transaction)
                 end
                 def action
                   @path = @file_storage.generate_path @sftp_connection
-                  @file_storage.store_payload(@sftp_connection, @payload, @path)
+                  @file_storage.store_payload(@sftp_connection, @payload_stream.read, @path) # TODO pass payload as a stream not a string
                 rescue Exception => e
                   raise Datanet::Skel::FileStorageException.new(e)
                 end
                 def rollback
                   @file_storage.delete_file(@sftp_connection, @path) if @path
                 end
-              end.new(transaction, @file_storage, file_transmission.sftp_connection, file[:payload])
+              end.new(transaction, @file_storage, file_transmission.sftp_connection, file[:payload_stream])
 
               path = file_upload.run_action
 
@@ -146,5 +150,18 @@ module Datanet
       end
 
     end
+
+    class FileEntityDecorator < EntityDecorator
+      def get_file id, connection
+        file_entity = get(id)
+        begin
+          payload = @file_storage.get_file(connection, file_entity['file_path'])
+        rescue Exception => e
+          raise Datanet::Skel::FileStorageException.new(e)
+        end
+        [ payload , file_entity['file_name'] ]
+      end
+    end
+
   end
 end
