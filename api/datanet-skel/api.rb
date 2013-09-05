@@ -5,6 +5,9 @@ module Datanet
     class API < Grape::API
       #format :json
 
+      helpers ::Datanet::Skel::APIHelpers
+
+      mount ::Datanet::Skel::ConfigurationApi
       mount ::Datanet::Skel::API_v1
 
       class << self
