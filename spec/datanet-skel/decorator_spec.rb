@@ -112,7 +112,7 @@ describe Datanet::Skel::EntityDecorator do
     end
 
     it 'throws exception when adding a file together with metadata file reference attribute' do
-      valid_entity = {'first_name' => 'marek', 'avatar_id' => 'this_is_a_cause_of_failure' }
+      valid_entity = {'first_name' => 'marek', 'avatar' => 'this_is_a_cause_of_failure' }
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => '' }}
 
       file_transmition = Datanet::Skel::FileTransmition.new(connection, files)
@@ -148,7 +148,7 @@ describe Datanet::Skel::EntityDecorator do
     end
 
     it 'adds one file succesfully but fails on adding second' do
-      valid_entity = {'first_name' => 'marek', 'avatar2_id' => 'this_is_a_cause_of_failure' }
+      valid_entity = {'first_name' => 'marek', 'avatar2' => 'this_is_a_cause_of_failure' }
 
       payload = double
       payload.should_receive(:read).exactly(2).times.and_return('payload')

@@ -69,10 +69,10 @@ module Datanet
 
         Datanet::Skel::Transaction.new.in_transaction do |transaction|
           unless file_transmission.nil? ||  file_transmission.files.nil?
-            file_transmission.files.each do |attr, file|
+            file_transmission.files.each do |attr_name, file|
 
-              unless json_doc["#{attr}_id"].nil?
-                raise Datanet::Skel::ValidationError.new "File upload conflicts with metadata attribute \'#{attr}\'"
+              unless json_doc["#{attr_name}"].nil?
+                raise Datanet::Skel::ValidationError.new "File upload conflicts with metadata attribute \'#{attr_name}\'"
               end
 
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
@@ -113,7 +113,7 @@ module Datanet
                 end
               end.new(transaction, file[:filename], path, @decorated_mapper)
 
-              json_doc["#{attr}_id"] = file_to_db.run_action
+              json_doc["#{attr_name}"] = file_to_db.run_action
             end
           end
 
