@@ -62,8 +62,12 @@ module Datanet
 
         def new_sftp_connection
           raise Datanet::Skel::FileStorageException.new("File storage authentication is disabled for this repository.") unless API.auth_storage
-          user, password = Rack::Auth::Basic::Request.new(env).credentials
+          user, password = credentials
           Datanet::Skel::SftpConnection.new(storage_host, user, password)
+        end
+
+        def credentials
+          Rack::Auth::Basic::Request.new(env).credentials
         end
 
         def file_transmition

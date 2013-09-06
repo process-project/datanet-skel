@@ -14,7 +14,7 @@ describe Datanet::Skel::ConfigurationApi do
 
   before do
     Datanet::Skel::API.auth = double
-    Datanet::Skel::API.auth.stub(:configuration).and_return({type: :private, owners: ['marek', 'daniel']})
+    Datanet::Skel::API.auth.stub(:configuration).and_return({repository_type: :private, owners: ['marek', 'daniel']})
     Datanet::Skel::API.auth.stub(:admin?).with('secret').and_return(true)
     Datanet::Skel::API.auth.stub(:admin?).with(nil).and_return(false)
   end
@@ -24,7 +24,7 @@ describe Datanet::Skel::ConfigurationApi do
       it 'returns configuration' do
         get authorized_path
         expect(last_response.status).to eq 200
-        json_response.should == {'type' => 'private', 'owners' => ['marek', 'daniel']}
+        json_response.should == {'repository_type' => 'private', 'owners' => ['marek', 'daniel']}
       end
 
       it 'returns 401 (Unauthorized) when no private_token' do
@@ -45,10 +45,10 @@ describe Datanet::Skel::ConfigurationApi do
 
   describe 'PUT _configuration' do
     context 'when auth defined' do
-      it 'updates repository type' do
+      it 'updates repository repository_type' do
         Datanet::Skel::API.auth.should_receive(:repository_type=).with(:private)
 
-        put authorized_path, {type: :private}
+        put authorized_path, {repository_type: :private}
         expect(last_response.status).to eq 200
       end
 

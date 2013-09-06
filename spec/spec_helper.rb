@@ -33,3 +33,7 @@ end
 def model_path(model_name)
   File.join(models_dir, "#{model_name}.json")
 end
+
+def auth_dir
+  File.join(File.dirname(__FILE__), 'resources', 'auth')
+end

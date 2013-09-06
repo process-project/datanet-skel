@@ -8,9 +8,14 @@ module Datanet
       def attributes_for_keys(keys)
         attrs = {}
         keys.each do |key|
-          attrs[key] = params[key] if params[key].present?
+          attrs[key] = params[key] if !blank?(params[key])
         end
         attrs
+      end
+
+
+      def blank?(str)
+        str.respond_to?(:empty?) ? str.empty? : !str
       end
 
       def render_api_error!(message, status)

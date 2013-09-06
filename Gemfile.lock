@@ -1,0 +1,113 @@
+PATH
+  remote: .
+  specs:
+    datanet-skel (0.0.1)
+      grape
+      json
+      json-schema
+      net-sftp
+      settingslogic
+      sinatra
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (3.2.12)
+      i18n (~> 0.6)
+      multi_json (~> 1.0)
+    backports (2.6.7)
+    builder (3.1.4)
+    coderay (1.0.8)
+    descendants_tracker (0.0.1)
+    diff-lcs (1.1.3)
+    ffi (1.3.1)
+    grape (0.3.2)
+      activesupport
+      builder
+      hashie (>= 1.2.0)
+      multi_json (>= 1.3.2)
+      multi_xml (>= 0.5.2)
+      rack
+      rack-accept
+      rack-mount
+      virtus
+    guard (1.6.1)
+      listen (>= 0.6.0)
+      lumberjack (>= 1.0.2)
+      pry (>= 0.9.10)
+      thor (>= 0.14.6)
+    guard-rspec (2.4.0)
+      guard (>= 1.1)
+      rspec (~> 2.11)
+    hashie (1.2.0)
+    i18n (0.6.4)
+    json (1.7.7)
+    json-schema (1.1.1)
+    libnotify (0.8.0)
+      ffi (>= 1.0.11)
+    listen (0.7.2)
+    lumberjack (1.0.2)
+    method_source (0.8.1)
+    multi_json (1.6.1)
+    multi_xml (0.5.3)
+    net-sftp (2.0.5)
+      net-ssh (>= 2.0.9)
+    net-ssh (2.6.2)
+    pry (0.9.11.2)
+      coderay (~> 1.0.5)
+      method_source (~> 0.8)
+      slop (~> 3.4)
+    rack (1.4.4)
+    rack-accept (0.4.5)
+      rack (>= 0.4)
+    rack-mount (0.8.3)
+      rack (>= 1.0.0)
+    rack-protection (1.4.0)
+      rack
+    rack-test (0.6.2)
+      rack (>= 1.0)
+    rake (10.0.3)
+    rb-fchange (0.0.6)
+      ffi
+    rb-fsevent (0.9.3)
+    rb-inotify (0.8.8)
+      ffi (>= 0.5.0)
+    rspec (2.12.0)
+      rspec-core (~> 2.12.0)
+      rspec-expectations (~> 2.12.0)
+      rspec-mocks (~> 2.12.0)
+    rspec-core (2.12.2)
+    rspec-expectations (2.12.1)
+      diff-lcs (~> 1.1.3)
+    rspec-mocks (2.12.1)
+    settingslogic (2.0.9)
+    shotgun (0.9)
+      rack (>= 1.0)
+    sinatra (1.3.5)
+      rack (~> 1.4)
+      rack-protection (~> 1.3)
+      tilt (~> 1.3, >= 1.3.3)
+    slop (3.4.3)
+    thor (0.16.0)
+    tilt (1.3.4)
+    virtus (0.5.4)
+      backports (~> 2.6.1)
+      descendants_tracker (~> 0.0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  datanet-skel!
+  guard
+  guard-rspec
+  libnotify
+  pry
+  rack-test
+  rake
+  rb-fchange
+  rb-fsevent
+  rb-inotify
+  rspec
+  rspec-mocks
+  shotgun

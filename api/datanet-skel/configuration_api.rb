@@ -25,9 +25,10 @@ module Datanet
         end
 
         put do
-          attrs = attributes_for_keys [:type, :owners]
-          API.auth.repository_type = attrs[:type].to_sym if attrs[:type]
+          attrs = attributes_for_keys [:repository_type, :owners]
+          API.auth.repository_type = attrs[:repository_type].to_sym if attrs[:repository_type]
           API.auth.owners = attrs[:owners] if attrs[:owners]
+          API.auth.configuration
         end
       end
     end
