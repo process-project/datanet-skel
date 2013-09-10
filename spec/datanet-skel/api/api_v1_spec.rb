@@ -74,17 +74,17 @@ describe Datanet::Skel::API_v1 do
 			last_response.status.should == 404
 		end
 
-		it 'gets user collection entities ids' do
-			ids = ['1', '2', '3']
-			@user_collection.should_receive(:ids).and_return(ids)
+		it 'gets user collection entities' do
+			elements = ['1', '2', '3']
+			@user_collection.should_receive(:index).and_return(elements)
 
 			get 'user', nil, headers
 			last_response.status.should == 200
-			JSON.parse(last_response.body).should == ids
+			JSON.parse(last_response.body).should == elements
 		end
 
-		it 'gets empty user collection entities ids' do
-			@user_collection.should_receive(:ids).and_return(nil)
+		it 'gets empty user collection entities' do
+			@user_collection.should_receive(:index).and_return(nil)
 
 			get 'user', nil, headers
 			last_response.status.should == 200

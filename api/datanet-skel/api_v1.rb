@@ -127,7 +127,7 @@ module Datanet
           if request.params.size > 0 then
             collection.search(request.params)
           else
-            collection.ids or []
+            collection.index or []
           end
         end
 
