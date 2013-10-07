@@ -267,4 +267,28 @@ describe Datanet::Skel::EntityDecorator do
       app('user').schema.should == user_schema
     end
   end
+
+  describe 'attribute datatype' do
+    before { @model_location = models_dir }
+
+    it 'knows strings' do
+      attr_type = app('user').attr_type('first_name')
+      expect(attr_type).to eq :string
+    end
+
+    it 'knows integers' do
+      attr_type = app('user').attr_type('age')
+      expect(attr_type).to eq :number
+    end
+
+    it 'knows numbers' do
+      attr_type = app('user').attr_type('weight')
+      expect(attr_type).to eq :number
+    end
+
+    it 'knows array' do
+      attr_type = app('book').attr_type('tags')
+      expect(attr_type).to eq :array
+    end
+  end
 end

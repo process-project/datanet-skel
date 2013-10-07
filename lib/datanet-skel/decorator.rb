@@ -139,7 +139,23 @@ module Datanet
         JSON.parse(File.read(@model_path))
       end
 
+      ATTR_TYPES_MAP = {
+        'string' => :string,
+        'integer' => :number,
+        'number' => :number,
+        'array' => :array
+      }
+
+      def attr_type(attr_name)
+        raw_type = raw_attr_type attr_name
+        raw_type ? ATTR_TYPES_MAP[raw_type] : nil
+      end
+
     private
+
+      def raw_attr_type(attr_name)
+        schema['properties'][attr_name]['type'] if schema['properties'][attr_name]
+      end
 
       def valid!(json_doc)
         begin

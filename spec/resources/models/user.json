@@ -3,6 +3,7 @@
   "properties": {
     "first_name": {"type": "string", "required": true},
     "last_name" : {"type": "string", "required": true},
-    "age"       : {"type": "integer", "required": true}
+    "age"       : {"type": "integer", "required": true},
+    "weight"    : {"type": "number", "required": false}
   }
 }

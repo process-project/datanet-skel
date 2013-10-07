@@ -90,34 +90,96 @@ describe Datanet::Skel::API_v1 do
 			last_response.status.should == 200
 			JSON.parse(last_response.body).should == []
 		end
-	end
 
-	describe "GET /:collection_name?search=value" do
-		it 'gets entities ids using single query element' do
-			ids = ['1', '2']
-			@user_collection.should_receive(:search).with({"name" => "marek"}).and_return(ids)
+    context '?search=value' do
+      before do
+        @user_collection.stub(:attr_type).with('name').and_return(:string)
+        @user_collection.stub(:attr_type).with('age').and_return(:number)
+        @user_collection.stub(:attr_type).with('tags').and_return(:array)
+      end
 
-			get 'user?name=marek', nil, headers
-			last_response.status.should == 200
-			JSON.parse(last_response.body).should == ids
-		end
+      it 'gets entities ids using single query element' do
+        ids = ['1', '2']
+        @user_collection.should_receive(:search).with({"name" => "marek"}).and_return(ids)
 
-		it 'gets entities ids using complex (AND) query' do
-			ids = ['1', '3']
-			@user_collection.should_receive(:search)
-				.with({"name" => "marek", "age" => "31"}).and_return(ids)
+        get 'user?name=marek', nil, headers
+        last_response.status.should == 200
+        JSON.parse(last_response.body).should == ids
+      end
 
-			get 'user?name=marek&age=31', nil, headers
-			last_response.status.should == 200
-			JSON.parse(last_response.body).should == ids
-		end
+      it 'gets entities ids using complex (AND) query' do
+        ids = ['1', '3']
+        @user_collection.should_receive(:search)
+          .with({"name" => "marek", "age" => "31"}).and_return(ids)
+
+        get 'user?name=marek&age=31', nil, headers
+        last_response.status.should == 200
+        JSON.parse(last_response.body).should == ids
+      end
+
+      context 'with operator' do
+        context 'number' do
+          it 'returns all smaller elements (<)' do
+            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :<})
+
+            get 'user?age=%3C31', nil, headers
+          end
+
+          it 'returns equals or smaller elements (<=)' do
+            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :<=})
+
+            get 'user?age=%3C%3D31', nil, headers
+          end
+
+          it 'returns greater elements (>)' do
+             @user_collection.should_receive(:search).with("age" => {value: "31", operator: :>})
+
+            get 'user?age=%3E31', nil, headers
+          end
+
+          it 'returns equals or greater elements (>=)' do
+             @user_collection.should_receive(:search).with("age" => {value: "31", operator: :>=})
+
+            get 'user?age=%3E%3D31', nil, headers
+          end
+
+          it 'returns not equals elements (!=)' do
+            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :!=})
+
+            get 'user?age=!%3D31', nil, headers
+          end
+        end
+
+        context 'string' do
+          it 'should ignore number operator' do
+            @user_collection.should_receive(:search).with("name" => '<name')
+
+            get 'user?name=%3Cname', nil, headers
+          end
+
+          it 'returns query with like operator' do
+            @user_collection.should_receive(:search).with("name" => {value: 'regexp', operator: :regexp})
+
+            get 'user?name=/regexp/', nil, headers
+          end
+        end
+
+        context 'array' do
+          it 'return query with contains operator' do
+            @user_collection.should_receive(:search).with("tags" => {value: ['1', '2', '3'], operator: :contains})
+
+            get 'user?tags=1,2,3', nil, headers
+          end
+        end
+      end
+    end
 	end
 
 	describe 'POST /:collection_name' do
     it 'adds valid entity into user collection' do
       new_user = {'first_name' => 'marek', 'age' => 31}
       @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
-                                                                                                                                                                     \
+
       post 'user', new_user.to_json, headers
       last_response.status.should == 201
       last_response.body.should == user_id

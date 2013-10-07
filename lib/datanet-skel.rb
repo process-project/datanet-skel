@@ -10,6 +10,7 @@ module Datanet
     autoload :RelationInspector,            'datanet-skel/relation_inspector'
     autoload :PortalAuthenticatable,        'datanet-skel/portal_authenticatable'
     autoload :RepositoryAuth,               'datanet-skel/repository_auth'
+    autoload :Search,                       'datanet-skel/search'
 
     autoload :CollectionNotFoundException,  'datanet-skel/exceptions'
     autoload :EntityNotFoundException,      'datanet-skel/exceptions'

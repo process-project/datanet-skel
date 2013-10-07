@@ -125,7 +125,7 @@ module Datanet
         end
         get ":collection_name" do
           if request.params.size > 0 then
-            collection.search(request.params)
+            collection.search(Datanet::Skel::Search.decode(request.params, collection))
           else
             collection.index or []
           end
