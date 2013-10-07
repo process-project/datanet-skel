@@ -12,8 +12,9 @@ module Datanet
           else
             if attr_type == :number
               NUMBER_OPERATORS.each do |operator|
-                hsh[k] = {value: v[operator.length, v.length], operator: operator} if v.start_with? operator.to_s
+                hsh[k] = {value: v[operator.length, v.length].to_f, operator: operator} if v.start_with? operator.to_s
               end
+              hsh[k] = v.to_f if hsh[k].nil?
             elsif attr_type == :string
               hsh[k] = {value: v[1, v.length-2], operator: :regexp} if v =~ /\A\/.*\/\z/
             elsif attr_type == :array

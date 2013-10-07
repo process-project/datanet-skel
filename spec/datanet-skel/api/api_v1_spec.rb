@@ -110,7 +110,7 @@ describe Datanet::Skel::API_v1 do
       it 'gets entities ids using complex (AND) query' do
         ids = ['1', '3']
         @user_collection.should_receive(:search)
-          .with({"name" => "marek", "age" => "31"}).and_return(ids)
+          .with({"name" => "marek", "age" => 31.0}).and_return(ids)
 
         get 'user?name=marek&age=31', nil, headers
         last_response.status.should == 200
@@ -120,31 +120,31 @@ describe Datanet::Skel::API_v1 do
       context 'with operator' do
         context 'number' do
           it 'returns all smaller elements (<)' do
-            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :<})
+            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :<})
 
             get 'user?age=%3C31', nil, headers
           end
 
           it 'returns equals or smaller elements (<=)' do
-            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :<=})
+            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :<=})
 
             get 'user?age=%3C%3D31', nil, headers
           end
 
           it 'returns greater elements (>)' do
-             @user_collection.should_receive(:search).with("age" => {value: "31", operator: :>})
+             @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :>})
 
             get 'user?age=%3E31', nil, headers
           end
 
           it 'returns equals or greater elements (>=)' do
-             @user_collection.should_receive(:search).with("age" => {value: "31", operator: :>=})
+             @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :>=})
 
             get 'user?age=%3E%3D31', nil, headers
           end
 
           it 'returns not equals elements (!=)' do
-            @user_collection.should_receive(:search).with("age" => {value: "31", operator: :!=})
+            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :!=})
 
             get 'user?age=!%3D31', nil, headers
           end
