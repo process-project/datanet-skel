@@ -331,7 +331,7 @@ describe Datanet::Skel::API_v1 do
    end
   end
 
-	describe 'GET /:collection_name/schema' do
+	describe 'GET /:collection_name.schema' do
 		it 'returns schema json' do
 			schema = {
 				"type" => "object",
@@ -342,7 +342,7 @@ describe Datanet::Skel::API_v1 do
 			}
 			@user_collection.should_receive(:schema).and_return(schema)
 
-			get 'user/schema', nil, headers
+			get 'user.schema', nil, headers
 			last_response.status.should == be_ok
 			JSON.parse(last_response.body).should == schema
 		end
@@ -350,7 +350,7 @@ describe Datanet::Skel::API_v1 do
 			@mapper.should_receive(:collection).with('non_existing')
 				.and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
-			get 'non_existing/schema', nil, headers
+			get 'non_existing.schema', nil, headers
 			last_response.status.should == 404
 		end
 	end

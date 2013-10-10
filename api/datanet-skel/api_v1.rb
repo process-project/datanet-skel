@@ -119,6 +119,16 @@ module Datanet
       desc "Model entities."
       resource '/' do
 
+        desc "Get entity schema"
+        params do
+          requires :collection_with_schema, :desc => 'Collection name with .schema'
+        end
+        get ':collection_with_schema', requirements: { collection_with_schema: /[\w-]*\.schema/} do
+          collection_with_schema = params[:collection_with_schema]
+          params[:collection_name] = collection_with_schema[0, collection_with_schema.length - 7]
+          collection.schema
+        end
+
         desc "Get all ids of the elements stored in this Entity"
         params do
           requires :collection_name, :desc => 'Collection name'
@@ -138,14 +148,6 @@ module Datanet
         post ":collection_name" do
           logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
           collection.add(doc!, file_transmition)
-        end
-
-        desc "Get entity schema"
-        params do
-          requires :collection_name, :desc => 'Collection name'
-        end
-        get ':collection_name/schema' do
-          collection.schema
         end
 
         desc "Get entity with given id"
