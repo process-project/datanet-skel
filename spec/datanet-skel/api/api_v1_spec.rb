@@ -96,6 +96,7 @@ describe Datanet::Skel::API_v1 do
         @user_collection.stub(:attr_type).with('name').and_return(:string)
         @user_collection.stub(:attr_type).with('age').and_return(:number)
         @user_collection.stub(:attr_type).with('tags').and_return(:array)
+        @user_collection.stub(:attr_type).with('active').and_return(:boolean)
       end
 
       it 'gets entities ids using single query element' do
@@ -169,6 +170,24 @@ describe Datanet::Skel::API_v1 do
             @user_collection.should_receive(:search).with("tags" => {value: ['1', '2', '3'], operator: :contains})
 
             get 'user?tags=1,2,3', nil, headers
+          end
+        end
+
+        context 'boolean' do
+          before do
+            @user_collection.should_receive(:search).with("active" => true)
+          end
+
+          it 'converts true string into boolean true' do
+            get 'user?active=true', nil, headers
+          end
+
+          it 'converts yes string into boolean true' do
+            get 'user?active=yes', nil, headers
+          end
+
+          it 'converts 1 string into boolean true' do
+            get 'user?active=1', nil, headers
           end
         end
       end

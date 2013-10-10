@@ -19,12 +19,20 @@ module Datanet
               hsh[k] = {value: v[1, v.length-2], operator: :regexp} if v =~ /\A\/.*\/\z/
             elsif attr_type == :array
               hsh[k] = {value: v.split(','), operator: :contains}
+            elsif attr_type == :boolean
+              hsh[k] = to_boolean(v)
             end
 
             hsh[k] = v if hsh[k].nil?
           end
           hsh
         end
+      end
+
+      private
+
+      def self.to_boolean(s)
+        !!(s =~ /^(true|yes|1)$/i)
       end
     end
   end

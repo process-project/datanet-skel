@@ -290,5 +290,10 @@ describe Datanet::Skel::EntityDecorator do
       attr_type = app('book').attr_type('tags')
       expect(attr_type).to eq :array
     end
+
+    it 'knows boolean' do
+      attr_type = app('book').attr_type('published')
+      expect(attr_type).to eq :boolean
+    end
   end
 end

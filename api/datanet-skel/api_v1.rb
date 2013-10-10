@@ -59,13 +59,16 @@ module Datanet
           json.inject({}) do |hsh, entity|
             k, v = entity.first, entity.last
             attr_type = collection.attr_type k
-            hsh[k] = case attr_type
+            begin
+              hsh[k] = case attr_type
                       when :integer then v.to_i
                       when :number then v.to_f
                       else
                         v
                       end
-
+            rescue
+              hash[k] = v
+            end
             hsh
           end
         end

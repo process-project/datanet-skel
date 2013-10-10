@@ -143,7 +143,8 @@ module Datanet
         'string' => :string,
         'integer' => :number,
         'number' => :number,
-        'array' => :array
+        'array' => :array,
+        'boolean' => :boolean
       }
 
       def attr_type(attr_name)
