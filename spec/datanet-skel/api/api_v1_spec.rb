@@ -176,8 +176,9 @@ describe Datanet::Skel::API_v1 do
 	end
 
 	describe 'POST /:collection_name' do
+    let(:new_user) { {'first_name' => 'marek', 'age' => 31} }
+
     it 'adds valid entity into user collection' do
-      new_user = {'first_name' => 'marek', 'age' => 31}
       @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
 
       post 'user', new_user.to_json, headers
@@ -197,22 +198,50 @@ describe Datanet::Skel::API_v1 do
 
     it 'adds entity with files' do
 
-      @user_collection.should_receive(:add) do |arg1, arg2|
-        arg1["attr"].should == "value"
-        arg2.sftp_connection.sftp_host.should == app.storage_host
-        arg2.sftp_connection.sftp_user.should == test_username
-        arg2.sftp_connection.sftp_password.should == test_password
-        neigh = arg2.files["neighbor"]
+      @user_collection.should_receive(:add) do |doc, file_transmition|
+        doc["attr"].should == "value"
+        file_transmition.sftp_connection.sftp_host.should == app.storage_host
+        file_transmition.sftp_connection.sftp_user.should == test_username
+        file_transmition.sftp_connection.sftp_password.should == test_password
+        neigh = file_transmition.files["neighbor"]
         neigh.should_not be_nil
         neigh[:filename].should == "picture.jpg"
         neigh[:payload_stream].read.should == "contents"
         user_id
       end
+      @user_collection.should_receive(:attr_type).with('attr').and_return(:string)
+
       post 'user', multipart_stream(:message_json_string), headers_multipart
       last_response.status.should == 201
       last_response.body.should == user_id
     end
 
+    context 'converting form attrs (numbers, integers, arrays)' do
+      before do
+        @user_collection.should_receive(:attr_type).with('first_name').and_return(:string)
+      end
+
+      it 'updates integer field basing on schema datatype if multipart request type' do
+        @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
+        @user_collection.should_receive(:attr_type).with('age').and_return(:integer)
+
+        post 'user', multipart_stream(:message_user), headers_multipart
+        last_response.status.should == 201
+        last_response.body.should == user_id
+      end
+
+      it 'updates integer field basing on schema datatype if multipart request type' do
+        user = new_user.dup
+        user['age'] = 31.0
+
+        @user_collection.should_receive(:add).with(user, nil).and_return(user_id)
+        @user_collection.should_receive(:attr_type).with('age').and_return(:number)
+
+        post 'user', multipart_stream(:message_user), headers_multipart
+        last_response.status.should == 201
+        last_response.body.should == user_id
+      end
+    end
   end
 
   describe 'GET /:collection_name/:id' do

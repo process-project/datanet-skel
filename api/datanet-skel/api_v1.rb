@@ -49,15 +49,29 @@ module Datanet
 
         def doc!
           if form_data
-            JSON.parse(form_data.metadata)
+            fix_types JSON.parse(form_data.metadata)
           else
             JSON.parse(env['rack.input'].string)
           end
         end
 
+        def fix_types(json)
+          json.inject({}) do |hsh, entity|
+            k, v = entity.first, entity.last
+            attr_type = collection.attr_type k
+            hsh[k] = case attr_type
+                      when :integer then v.to_i
+                      when :number then v.to_f
+                      else
+                        v
+                      end
+
+            hsh
+          end
+        end
+
         def form_data
-          params[:datanet_form_multipart] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"]) if
-              @request.form_data? && env["rack.request.form_hash"]
+          params[:datanet_form_multipart] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"]) if @request.form_data? && env["rack.request.form_hash"]
         end
 
         def new_sftp_connection
