@@ -21,11 +21,11 @@ module Datanet
         Dir[File.join(model_location, "*.json")].each { |file|
           collections << File.basename(file, '.json')
         }
+        collection = collections - ['file']
 
-        raise Datanet::Skel::WrongModelLocationError, 'No models in selected models directory' if
-          collections.size == 0
+        raise Datanet::Skel::WrongModelLocationError, 'No models in selected models directory' if collections.size == 0
 
-        collections.sort!
+        collection.sort!
       end
 
       def file_storage

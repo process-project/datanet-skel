@@ -22,7 +22,7 @@ describe Datanet::Skel::MapperDecorator do
     it 'lists registered collections' do
       @model_location = models_dir
 
-      app.collections.should == ['address', 'book', 'file', 'user', 'with_file']
+      app.collections.should == ['address', 'book', 'user', 'with_file']
     end
 
     it 'raises exception while model directory does not exist' do
