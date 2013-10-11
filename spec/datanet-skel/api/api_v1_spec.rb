@@ -190,6 +190,16 @@ describe Datanet::Skel::API_v1 do
             get 'user?active=1', nil, headers
           end
         end
+
+        context 'compount query params' do
+          before do
+            @user_collection.should_receive(:search).with("age" => [{value: 2, operator: :>}, {value: 5, operator: :<}])
+          end
+
+          it 'creates query with attr equals 2 and smaller than 5' do
+            get 'user?age[]=%3E2&age[]=%3C5', nil, headers
+          end
+        end
       end
     end
 	end

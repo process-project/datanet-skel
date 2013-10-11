@@ -10,26 +10,44 @@ module Datanet
           if v.nil? or attr_type.nil?
             hash[k] = v
           else
-            if attr_type == :number
-              NUMBER_OPERATORS.each do |operator|
-                hsh[k] = {value: v[operator.length, v.length].to_f, operator: operator} if v.start_with? operator.to_s
-              end
-              hsh[k] = v.to_f if hsh[k].nil?
-            elsif attr_type == :string
-              hsh[k] = {value: v[1, v.length-2], operator: :regexp} if v =~ /\A\/.*\/\z/
-            elsif attr_type == :array
-              hsh[k] = {value: v.split(','), operator: :contains}
-            elsif attr_type == :boolean
-              hsh[k] = to_boolean(v)
+            v = [v] unless v.instance_of? Array
+            values = []
+            v.each do |element|
+              values << case attr_type
+                          when :number  then number_operator(element)
+                          when :string  then string_operator(element)
+                          when :array   then to_array(element)
+                          when :boolean then to_boolean(element)
+                          else element
+                        end
             end
-
-            hsh[k] = v if hsh[k].nil?
+            hsh[k] = case values.size
+                          when 0 then v
+                          when 1 then values[0]
+                          else values
+                        end
           end
           hsh
         end
       end
 
       private
+
+      def self.to_array(element)
+        {value: element.split(','), operator: :contains}
+      end
+
+      def self.number_operator(element)
+        result = nil
+        NUMBER_OPERATORS.each do |operator|
+          result = {value: element[operator.length, element.length].to_f, operator: operator} if element.start_with? operator.to_s
+        end
+        result || element.to_f
+      end
+
+      def self.string_operator(element)
+        element =~ /\A\/.*\/\z/ ? {value: element[1, element.length-2], operator: :regexp} : element
+      end
 
       def self.to_boolean(s)
         !!(s =~ /^(true|yes|1)$/i)
