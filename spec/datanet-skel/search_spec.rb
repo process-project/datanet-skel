@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Datanet::Skel::Search, focus: true do
+describe Datanet::Skel::Search do
   let(:collection) { double }
 
   before do

@@ -51,7 +51,7 @@ module Datanet
           if form_data
             fix_types JSON.parse(form_data.metadata)
           else
-            JSON.parse(env['rack.input'].string)
+            JSON.parse(env['rack.input'].gets)
           end
         end
 
@@ -63,6 +63,7 @@ module Datanet
               hsh[k] = case attr_type
                       when :integer then v.to_i
                       when :number then v.to_f
+                      when :array then JSON.parse(v)
                       else
                         v
                       end

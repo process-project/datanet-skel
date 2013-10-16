@@ -1,9 +1,11 @@
 {
   "type": "object",
   "properties": {
-    "first_name": {"type": "string", "required": true},
-    "last_name" : {"type": "string", "required": true},
+    "first_name": {"type": "string",  "required": true},
+    "last_name" : {"type": "string",  "required": true},
     "age"       : {"type": "integer", "required": true},
-    "weight"    : {"type": "number", "required": false}
+    "weight"    : {"type": "number",  "required": false},
+    "tags"      : {"type": "array",   "required": false, "items":{"type":"string"}},
+    "nrs"      : {"type": "array",   "required": false, "items":{"type":"integer"}}
   }
 }

@@ -216,7 +216,7 @@ describe Datanet::Skel::API_v1 do
     end
 
 		it 'adds invalid entity into user collection' do
-			new_user = {'first_name' => 'marek'}
+			new_user = {'first_name' => 'marek', 'tags' => ['a', 'b', 'c'], 'nrs' => [1, 2, 3]}
 			@user_collection.should_receive(:add).with(new_user, nil)
 				.and_raise(Datanet::Skel::ValidationError.new)
 
@@ -269,6 +269,25 @@ describe Datanet::Skel::API_v1 do
         post 'user', multipart_stream(:message_user), headers_multipart
         last_response.status.should == 201
         last_response.body.should == user_id
+      end
+
+      context 'array fields' do
+
+        let(:new_user_with_array) { {'first_name' => 'marek', 'age' => 31, 'tags' => ['a', 'b', 'c'], 'nrs' => [1, 2, 3]} }
+
+        before do
+          @user_collection.should_receive(:attr_type).with('age').and_return(:integer)
+          @user_collection.should_receive(:attr_type).with('tags').and_return(:array)
+          @user_collection.should_receive(:attr_type).with('nrs').and_return(:array)
+        end
+
+        it 'converts into array subtype' do
+          @user_collection.should_receive(:add).with(new_user_with_array, nil).and_return(user_id)
+
+          post 'user', multipart_stream(:message_user_with_array), headers_multipart
+          last_response.status.should == 201
+          last_response.body.should == user_id
+        end
       end
     end
   end
