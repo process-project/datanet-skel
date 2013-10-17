@@ -51,7 +51,7 @@ module Datanet
           if form_data
             fix_types JSON.parse(form_data.metadata)
           else
-            JSON.parse(env['rack.input'].gets)
+            JSON.parse(env['rack.input'].gets || env['rack.input'].string)
           end
         end
 
