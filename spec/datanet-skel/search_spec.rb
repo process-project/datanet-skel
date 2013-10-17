@@ -104,5 +104,10 @@ describe Datanet::Skel::Search do
       result = subject.decode({'age' => ['>2', '<5']}, collection)
       result['age'].should == [{value: 2, operator: :>}, {value: 5, operator: :<}]
     end
+
+    it 'returns ids search' do
+      result = subject.decode({'id' => ['1', '2']}, collection)
+      result['id'].should == ['1', '2']
+    end
   end
 end
