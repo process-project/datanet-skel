@@ -218,11 +218,11 @@ describe Datanet::Skel::API_v1 do
 		it 'adds invalid entity into user collection' do
 			new_user = {'first_name' => 'marek', 'tags' => ['a', 'b', 'c'], 'nrs' => [1, 2, 3]}
 			@user_collection.should_receive(:add).with(new_user, nil)
-				.and_raise(Datanet::Skel::ValidationError.new)
+				.and_raise(Datanet::Skel::ValidationError.new 'error message')
 
 			post 'user', new_user.to_json, headers
 			last_response.status.should == 422
-			# TODO check validation error message
+			expect(last_response.body).to eq 'error message'
     end
 
     it 'adds entity with files' do

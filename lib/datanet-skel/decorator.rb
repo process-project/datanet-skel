@@ -66,13 +66,12 @@ module Datanet
       end
 
       def add(json_doc, file_transmission = nil)
-
         Datanet::Skel::Transaction.new.in_transaction do |transaction|
           unless file_transmission.nil? ||  file_transmission.files.nil?
             file_transmission.files.each do |attr_name, file|
 
               unless json_doc["#{attr_name}"].nil?
-                raise Datanet::Skel::ValidationError.new "File upload conflicts with metadata attribute \'#{attr_name}\'"
+                raise Datanet::Skel::ValidationError, "File upload conflicts with metadata attribute \'#{attr_name}\'"
               end
 
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
@@ -162,9 +161,9 @@ module Datanet
         begin
           JSON::Validator.validate!(@model_path, json_doc)
         rescue JSON::Schema::ValidationError
-          raise Datanet::Skel::ValidationError.new $!.message[0, $!.message.index(' in schema')]
+          raise Datanet::Skel::ValidationError, $!.message[0, $!.message.index(' in schema')]
         rescue
-          raise Datanet::Skel::ValidationError.new 'Wrong json format'
+          raise Datanet::Skel::ValidationError, 'Wrong json format'
         end
       end
 
