@@ -15,6 +15,7 @@ module Datanet
             v.each do |element|
               values << case attr_type
                           when :number  then number_operator(element)
+                          when :integer then number_operator(element)
                           when :string  then string_operator(element)
                           when :array   then to_array(element)
                           when :boolean then to_boolean(element)

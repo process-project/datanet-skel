@@ -4,7 +4,7 @@ describe Datanet::Skel::Search do
   let(:collection) { double }
 
   before do
-    collection.stub(:attr_type).with('age').and_return(:number)
+    collection.stub(:attr_type).with('age').and_return(:integer)
     collection.stub(:attr_type).with('weight').and_return(:number)
     collection.stub(:attr_type).with('active').and_return(:boolean)
     collection.stub(:attr_type).with('name').and_return(:string)
