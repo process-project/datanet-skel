@@ -9,6 +9,7 @@ describe Datanet::Skel::Search do
     collection.stub(:attr_type).with('active').and_return(:boolean)
     collection.stub(:attr_type).with('name').and_return(:string)
     collection.stub(:attr_type).with('tags').and_return(:array)
+    collection.stub(:attr_type).with('id').and_return(nil)
   end
 
   context 'simple query' do
@@ -47,6 +48,11 @@ describe Datanet::Skel::Search do
     it 'returns string query' do
       result = subject.decode({'name' => 'marek'}, collection)
       result['name'].should == 'marek'
+    end
+
+    it 'returns raw value for unknown attributes (e.g. id)' do
+      result = subject.decode({'id' => '123dfa2'}, collection)
+      result['id'].should == '123dfa2'
     end
   end
 

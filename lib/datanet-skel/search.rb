@@ -8,7 +8,7 @@ module Datanet
           k, v = entity.first, entity.last
           attr_type = collection.attr_type k
           if v.nil? or attr_type.nil?
-            hash[k] = v
+            hsh[k] = v
           else
             v = [v] unless v.instance_of? Array
             values = []
