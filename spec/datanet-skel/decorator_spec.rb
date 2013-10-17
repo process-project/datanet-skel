@@ -278,7 +278,7 @@ describe Datanet::Skel::EntityDecorator do
 
     it 'knows integers' do
       attr_type = app('user').attr_type('age')
-      expect(attr_type).to eq :number
+      expect(attr_type).to eq :integer
     end
 
     it 'knows numbers' do

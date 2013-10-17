@@ -140,7 +140,7 @@ module Datanet
 
       ATTR_TYPES_MAP = {
         'string' => :string,
-        'integer' => :number,
+        'integer' => :integer,
         'number' => :number,
         'array' => :array,
         'boolean' => :boolean
