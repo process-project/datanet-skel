@@ -102,6 +102,7 @@ describe Datanet::Skel::Search do
   context 'complex query' do
     it 'returns 2 conditions for age between 2 and 5' do
       result = subject.decode({'age' => ['>2', '<5']}, collection)
+      result['age'].should == [{value: 2, operator: :>}, {value: 5, operator: :<}]
     end
   end
 end
