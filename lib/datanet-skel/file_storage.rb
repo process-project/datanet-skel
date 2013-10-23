@@ -56,8 +56,8 @@ module Datanet
 
       def prepare_datanet_dir(sftp, user_base)
         existing = false
-        sftp.dir.glob(user_base, @folder_name) do |entry|
-          existing = true
+        sftp.dir.foreach(user_base) do |entry|
+          existing = true if entry.name === @folder_name
         end
         sftp.mkdir!("#{user_base}/#{@folder_name}") unless existing
       end
