@@ -1,6 +1,8 @@
 require 'net/sftp'
 require 'securerandom'
+require 'stringio'
 require 'datanet-skel/sftp_connection'
+
 
 module Datanet
   module Skel
@@ -22,8 +24,7 @@ module Datanet
 
         conn.in_session do |sftp|
           prepare_datanet_dir(sftp, user_base)
-          file = sftp.file.open(file_path, "w")
-          file.write(payload)
+          sftp.upload!(StringIO.new(payload), file_path)
         end
 
         file_path
