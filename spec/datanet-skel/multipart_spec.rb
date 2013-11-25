@@ -82,15 +82,10 @@ describe Rack::Multipart do
 
   it "parse multipart upload with file #{:message_no_meta}" do
     env = Rack::MockRequest.env_for("/", multipart_fixture(:message_no_meta))
-    caught = false
-    begin
-      params = Rack::Utils::Multipart.parse_multipart(env)
-      obj = Datanet::Skel::Multipart.new(params)
-    rescue Exception => e
-      caught = true
-      e.message.should == "Metadata not specified"
-    end
-    caught.should == true
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
+    obj.files['neighbor'][:payload_stream].read.should eq 'contents'
+    obj.files['neighbor'][:filename].should == "picture.jpg"
   end
 
   it "parse multipart upload with file #{:message_no_files}" do
@@ -101,5 +96,4 @@ describe Rack::Multipart do
     obj.metadata.should_not be_nil
     obj.metadata.should eq ({ "attr1" => "value1", "attr2" => "value2" }.to_json)
   end
-
 end

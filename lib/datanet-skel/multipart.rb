@@ -15,7 +15,6 @@ module Datanet
         @files = nil
         @fields = Hash.new
         build_object(params)
-        raise "Metadata not specified" if @metadata.nil?
       end
 
       def build_object(params)
