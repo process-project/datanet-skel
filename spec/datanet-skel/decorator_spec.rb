@@ -5,7 +5,7 @@ require 'datanet-skel/file_transmition'
 describe Datanet::Skel::MapperDecorator do
 
   def mapper
-    @mapper ||= mock(Datanet::Skel::MapperMock)
+    @mapper ||= double(Datanet::Skel::MapperMock)
   end
 
   def file_storage
@@ -64,7 +64,7 @@ end
 describe Datanet::Skel::EntityDecorator do
 
   def entity
-    @entity ||= mock(Datanet::Skel::CollectionMock)
+    @entity ||= double(Datanet::Skel::CollectionMock)
   end
 
   def file_storage

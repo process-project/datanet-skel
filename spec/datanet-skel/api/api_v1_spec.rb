@@ -38,8 +38,8 @@ describe Datanet::Skel::API_v1 do
   end
 
   before(:each) do
-		@user_collection = mock(Datanet::Skel::CollectionMock)
-		@mapper = mock(Datanet::Skel::MapperMock)
+		@user_collection = double(Datanet::Skel::CollectionMock)
+		@mapper = double(Datanet::Skel::MapperMock)
 		@mapper.stub(:collection).with('user')
 			.and_return(@user_collection)
 
