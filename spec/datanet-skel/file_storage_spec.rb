@@ -28,21 +28,19 @@ describe Datanet::Skel::FileStorage do
     # doubles
     file = double()
     inner_file = double()
+    entry = double(name: @folder_name)
 
     # stubs
     conn.stub(:sftp_user).and_return(@user)
     conn.stub(:in_session).and_yield(sftp)
     sftp.stub(:dir).and_return(dir)
-    sftp.stub(:file).and_return(file)
 
     #expectations
-    dir.should_receive(:glob).with("#{@base_path}/#{@user}",@folder_name).and_yield(@folder_name)
+    dir.should_receive(:foreach).with("#{@base_path}/#{@user}").and_yield(entry)
 
-    file.should_receive(:open) do |path, perms|
+    sftp.should_receive(:upload!) do |payload, path|
       path.should match("#{@full_path}/.*")
-      perm.should == "w"
-    end.and_return(inner_file)
-    inner_file.should_receive(:write).with(@payload)
+    end
 
     # initialization
     storage = Datanet::Skel::FileStorage.new()
@@ -61,16 +59,14 @@ describe Datanet::Skel::FileStorage do
     # stubs
     conn.stub(:sftp_user).and_return(@user)
     conn.stub(:in_session).and_yield(sftp)
-    sftp.stub_chain(:dir, :glob)
+    sftp.stub_chain(:dir, :foreach)
     sftp.stub(:file).and_return(file)
 
     #expectations
     sftp.should_receive(:mkdir!).with("#{@base_path}/#{@user}/#{@folder_name}")
-    file.should_receive(:open) do |path, perms|
+    sftp.should_receive(:upload!) do |payload, path|
       path.should match("#{@full_path}/.*")
-      perm.should == "w"
-    end.and_return(inner_file)
-    inner_file.should_receive(:write).with(@payload)
+    end
 
     # initialization
     storage = Datanet::Skel::FileStorage.new()
