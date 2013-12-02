@@ -255,7 +255,7 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').update(user_id, wrong_updated_values)
-      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/first_name' of type NilClass did not match the following type: string")
+      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/first_name' of type null did not match the following type: string")
     end
   end
 

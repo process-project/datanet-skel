@@ -4,6 +4,7 @@ require 'datanet-skel/file_transmition'
 
 describe Datanet::Skel::API_v1 do
 	include Rack::Test::Methods
+  include ApiHelpers
 
 	def app
     Datanet::Skel::API.auth_storage ||= double
@@ -49,46 +50,47 @@ describe Datanet::Skel::API_v1 do
 	describe 'GET /' do
 		it 'lists collections names' do
 			collections = ['a', 'b', 'c']
-			@mapper.should_receive(:collections).and_return(collections)
+			expect(@mapper).to receive(:collections).and_return(collections)
 
 			get '/', nil, headers
-			last_response.status.should == be_ok
-			JSON.parse(last_response.body).should == collections
+			expect(last_response.status).to eq 200
+			expect(json_response).to eq collections
 		end
 
 		it 'lists empty collections names' do
-			@mapper.should_receive(:collections).and_return(nil)
+			expect(@mapper).to receive(:collections).and_return(nil)
 
 			get '/', nil, headers
-			last_response.status.should == be_ok
-			JSON.parse(last_response.body).should == []
+			expect(last_response.status).to eq 200
+			expect(json_response).to eq []
 		end
 	end
 
 	describe 'GET :collection_name' do
 		it 'gets non existing collection' do
-			@mapper.should_receive(:collection).with('non_existing')
-				.and_raise(Datanet::Skel::CollectionNotFoundException.new)
+			expect(@mapper).to receive(:collection).with('non_existing')
+			 	.and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
-			get 'non_existing', nil, headers
-			last_response.status.should == 404
+  			get 'non_existing', nil, headers
+  			expect(last_response.status).to eq 404
 		end
 
 		it 'gets user collection entities' do
 			elements = ['1', '2', '3']
-			@user_collection.should_receive(:index).and_return(elements)
+			expect(@user_collection).to receive(:index).and_return(elements)
+      allow(@user_collection).to receive(:att_type).with('route_info').and_return(:nil)
 
 			get 'user', nil, headers
-			last_response.status.should == 200
-			JSON.parse(last_response.body).should == elements
+			expect(last_response.status).to eq 200
+			expect(JSON.parse(last_response.body)).to eq elements
 		end
 
 		it 'gets empty user collection entities' do
-			@user_collection.should_receive(:index).and_return(nil)
+			expect(@user_collection).to receive(:index).and_return(nil)
 
 			get 'user', nil, headers
-			last_response.status.should == 200
-			JSON.parse(last_response.body).should == []
+			expect(last_response.status).to eq 200
+			expect(json_response).to eq []
 		end
 
     context '?search=value' do
@@ -101,51 +103,50 @@ describe Datanet::Skel::API_v1 do
 
       it 'gets entities ids using single query element' do
         ids = ['1', '2']
-        @user_collection.should_receive(:search).with({"name" => "marek"}).and_return(ids)
+        expect(@user_collection).to receive(:search).with({"name" => "marek"}).and_return(ids)
 
         get 'user?name=marek', nil, headers
-        last_response.status.should == 200
-        JSON.parse(last_response.body).should == ids
+        expect(last_response.status).to eq 200
+        expect(json_response).to eq ids
       end
 
       it 'gets entities ids using complex (AND) query' do
         ids = ['1', '3']
-        @user_collection.should_receive(:search)
-          .with({"name" => "marek", "age" => 31.0}).and_return(ids)
+        expect(@user_collection).to receive(:search).with({"name" => "marek", "age" => 31.0}).and_return(ids)
 
         get 'user?name=marek&age=31', nil, headers
-        last_response.status.should == 200
-        JSON.parse(last_response.body).should == ids
+        expect(last_response.status).to eq 200
+        expect(json_response).to eq ids
       end
 
       context 'with operator' do
         context 'number' do
           it 'returns all smaller elements (<)' do
-            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :<})
+            expect(@user_collection).to receive(:search).with("age" => {value: 31.0, operator: :<})
 
             get 'user?age=%3C31', nil, headers
           end
 
           it 'returns equals or smaller elements (<=)' do
-            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :<=})
+            expect(@user_collection).to receive(:search).with("age" => {value: 31.0, operator: :<=})
 
             get 'user?age=%3C%3D31', nil, headers
           end
 
           it 'returns greater elements (>)' do
-             @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :>})
+             expect(@user_collection).to receive(:search).with("age" => {value: 31.0, operator: :>})
 
             get 'user?age=%3E31', nil, headers
           end
 
           it 'returns equals or greater elements (>=)' do
-             @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :>=})
+             expect(@user_collection).to receive(:search).with("age" => {value: 31.0, operator: :>=})
 
             get 'user?age=%3E%3D31', nil, headers
           end
 
           it 'returns not equals elements (!=)' do
-            @user_collection.should_receive(:search).with("age" => {value: 31.0, operator: :!=})
+            expect(@user_collection).to receive(:search).with("age" => {value: 31.0, operator: :!=})
 
             get 'user?age=!%3D31', nil, headers
           end
@@ -153,13 +154,13 @@ describe Datanet::Skel::API_v1 do
 
         context 'string' do
           it 'should ignore number operator' do
-            @user_collection.should_receive(:search).with("name" => '<name')
+            expect(@user_collection).to receive(:search).with("name" => '<name')
 
             get 'user?name=%3Cname', nil, headers
           end
 
           it 'returns query with like operator' do
-            @user_collection.should_receive(:search).with("name" => {value: 'regexp', operator: :regexp})
+            expect(@user_collection).to receive(:search).with("name" => {value: 'regexp', operator: :regexp})
 
             get 'user?name=/regexp/', nil, headers
           end
@@ -167,7 +168,7 @@ describe Datanet::Skel::API_v1 do
 
         context 'array' do
           it 'return query with contains operator' do
-            @user_collection.should_receive(:search).with("tags" => {value: ['1', '2', '3'], operator: :contains})
+            expect(@user_collection).to receive(:search).with("tags" => {value: ['1', '2', '3'], operator: :contains})
 
             get 'user?tags=1,2,3', nil, headers
           end
@@ -175,7 +176,7 @@ describe Datanet::Skel::API_v1 do
 
         context 'boolean' do
           before do
-            @user_collection.should_receive(:search).with("active" => true)
+            expect(@user_collection).to receive(:search).with("active" => true)
           end
 
           it 'converts true string into boolean true' do
@@ -193,7 +194,7 @@ describe Datanet::Skel::API_v1 do
 
         context 'compount query params' do
           before do
-            @user_collection.should_receive(:search).with("age" => [{value: 2, operator: :>}, {value: 5, operator: :<}])
+            expect(@user_collection).to receive(:search).with("age" => [{value: 2, operator: :>}, {value: 5, operator: :<}])
           end
 
           it 'creates query with attr equals 2 and smaller than 5' do
@@ -208,67 +209,66 @@ describe Datanet::Skel::API_v1 do
     let(:new_user) { {'first_name' => 'marek', 'age' => 31} }
 
     it 'adds valid entity into user collection' do
-      @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
+      expect(@user_collection).to receive(:add).with(new_user, nil).and_return(user_id)
 
       post 'user', new_user.to_json, headers
-      last_response.status.should == 201
-      last_response.body.should == user_id
+      expect(last_response.status).to eq 201
+      expect(json_response['id']).to eq user_id
     end
 
 		it 'adds invalid entity into user collection' do
 			new_user = {'first_name' => 'marek', 'tags' => ['a', 'b', 'c'], 'nrs' => [1, 2, 3]}
-			@user_collection.should_receive(:add).with(new_user, nil)
+			expect(@user_collection).to receive(:add).with(new_user, nil)
 				.and_raise(Datanet::Skel::ValidationError.new 'error message')
 
 			post 'user', new_user.to_json, headers
-			last_response.status.should == 422
+			expect(last_response.status).to eq 422
 			expect(last_response.body).to eq 'error message'
     end
 
     it 'adds entity with files' do
-
-      @user_collection.should_receive(:add) do |doc, file_transmition|
-        doc["attr"].should == "value"
-        file_transmition.sftp_connection.sftp_host.should == app.storage_host
-        file_transmition.sftp_connection.sftp_user.should == test_username
-        file_transmition.sftp_connection.sftp_password.should == test_password
+      expect(@user_collection).to receive(:add) do |doc, file_transmition|
+        expect(doc["attr"]).to eq "value"
+        expect(file_transmition.sftp_connection.sftp_host).to eq app.storage_host
+        expect(file_transmition.sftp_connection.sftp_user).to eq  test_username
+        expect(file_transmition.sftp_connection.sftp_password).to eq  test_password
         neigh = file_transmition.files["neighbor"]
-        neigh.should_not be_nil
-        neigh[:filename].should == "picture.jpg"
-        neigh[:payload_stream].read.should == "contents"
+        expect(neigh).to_not be_nil
+        expect(neigh[:filename]).to eq "picture.jpg"
+        expect(neigh[:payload_stream].read).to eq "contents"
         user_id
       end
-      @user_collection.should_receive(:attr_type).with('attr').and_return(:string)
+      expect(@user_collection).to receive(:attr_type).with('attr').and_return(:string)
 
       post 'user', multipart_stream(:message_json_string), headers_multipart
-      last_response.status.should == 201
-      last_response.body.should == user_id
+      expect(last_response.status).to eq 201
+      expect(json_response['id']).to eq user_id
     end
 
     context 'converting form attrs (numbers, integers, arrays)' do
       before do
-        @user_collection.should_receive(:attr_type).with('first_name').and_return(:string)
+        expect(@user_collection).to receive(:attr_type).with('first_name').and_return(:string)
       end
 
       it 'updates integer field basing on schema datatype if multipart request type' do
-        @user_collection.should_receive(:add).with(new_user, nil).and_return(user_id)
-        @user_collection.should_receive(:attr_type).with('age').and_return(:integer)
+        expect(@user_collection).to receive(:add).with(new_user, nil).and_return(user_id)
+        expect(@user_collection).to receive(:attr_type).with('age').and_return(:integer)
 
         post 'user', multipart_stream(:message_user), headers_multipart
-        last_response.status.should == 201
-        last_response.body.should == user_id
+        expect(last_response.status).to eq 201
+        expect(json_response['id']).to eq user_id
       end
 
       it 'updates integer field basing on schema datatype if multipart request type' do
         user = new_user.dup
         user['age'] = 31.0
 
-        @user_collection.should_receive(:add).with(user, nil).and_return(user_id)
-        @user_collection.should_receive(:attr_type).with('age').and_return(:number)
+        expect(@user_collection).to receive(:add).with(user, nil).and_return(user_id)
+        expect(@user_collection).to receive(:attr_type).with('age').and_return(:number)
 
         post 'user', multipart_stream(:message_user), headers_multipart
-        last_response.status.should == 201
-        last_response.body.should == user_id
+        expect(last_response.status).to eq 201
+        expect(json_response['id']).to eq user_id
       end
 
       context 'array fields' do
@@ -276,17 +276,17 @@ describe Datanet::Skel::API_v1 do
         let(:new_user_with_array) { {'first_name' => 'marek', 'age' => 31, 'tags' => ['a', 'b', 'c'], 'nrs' => [1, 2, 3]} }
 
         before do
-          @user_collection.should_receive(:attr_type).with('age').and_return(:integer)
-          @user_collection.should_receive(:attr_type).with('tags').and_return(:array)
-          @user_collection.should_receive(:attr_type).with('nrs').and_return(:array)
+          expect(@user_collection).to receive(:attr_type).with('age').and_return(:integer)
+          expect(@user_collection).to receive(:attr_type).with('tags').and_return(:array)
+          expect(@user_collection).to receive(:attr_type).with('nrs').and_return(:array)
         end
 
         it 'converts into array subtype' do
-          @user_collection.should_receive(:add).with(new_user_with_array, nil).and_return(user_id)
+          expect(@user_collection).to receive(:add).with(new_user_with_array, nil).and_return(user_id)
 
           post 'user', multipart_stream(:message_user_with_array), headers_multipart
-          last_response.status.should == 201
-          last_response.body.should == user_id
+          expect(last_response.status).to eq 201
+          expect(json_response['id']).to eq user_id
         end
       end
     end
@@ -295,15 +295,15 @@ describe Datanet::Skel::API_v1 do
   describe 'GET /:collection_name/:id' do
     it 'gets existing user entity' do
       user = {'first_name' => 'marek', 'age' => 31}
-      @user_collection.should_receive(:get).with(user_id).and_return(user)
+      expect(@user_collection).to receive(:get).with(user_id).and_return(user)
 
       get "user/#{user_id}", nil, headers
-      last_response.status.should == be_ok
-      JSON.parse(last_response.body).should == user
+      expect(last_response.status).to eq 200
+      expect(json_response).to eq user
     end
 
     it 'gets non existing user entity' do
-      @user_collection.should_receive(:get).with(user_id)
+      expect(@user_collection).to receive(:get).with(user_id)
       .and_raise(entity_not_found_error(user_id))
 
       get "user/#{user_id}", nil, headers
@@ -314,34 +314,33 @@ describe Datanet::Skel::API_v1 do
   describe 'GET /:collection_name/:id/:attr_name' do
     it 'gets existing user entity attribute' do
       user = {'first_name' => 'marek', 'age' => 31}
-      @user_collection.should_receive(:get).with(user_id).and_return(user)
+      expect(@user_collection).to receive(:get).with(user_id).and_return(user)
 
       get "user/#{user_id}/first_name", nil, headers
-      last_response.status.should == be_ok
-      last_response.body.should == 'marek'
+      expect(last_response.status).to eq 200
+      expect(last_response.body).to eq 'marek'
     end
 
     it 'gets non existing user entity attribute' do
       user = {'first_name' => 'marek', 'age' => 31}
-      @user_collection.should_receive(:get).with(user_id).and_return(user)
+      expect(@user_collection).to receive(:get).with(user_id).and_return(user)
 
       get "user/#{user_id}/non_existing", nil, headers
-      last_response.status.should == 404
-      JSON.parse(last_response.body).should ==
-        {'message' => "Attribute non_existing not found in #{user_id} user entity"}
+      expect(last_response.status).to eq 404
+      expect(json_response).to eq({'message' => "Attribute non_existing not found in #{user_id} user entity"})
     end
   end
 
 	describe 'DELETE /:collection_name/:id' do
 		it 'deletes existing user entity' do
-			@user_collection.should_receive(:remove).with(user_id)
+			expect(@user_collection).to receive(:remove).with(user_id)
 
 			delete "user/#{user_id}", nil, headers
-			last_response.status.should == be_ok
+			expect(last_response.status).to eq 200
 		end
 
 		it 'deletes non existing user entity' do
-			@user_collection.should_receive(:remove).with(user_id)
+			expect(@user_collection).to receive(:remove).with(user_id)
 				.and_raise(entity_not_found_error(user_id))
 
 			delete "user/#{user_id}", nil, headers
@@ -352,15 +351,15 @@ describe Datanet::Skel::API_v1 do
 	describe 'POST /:collection_name/:id' do
 		it 'updates existing user entity' do
 			update = {'first_name' => 'Marek'}
-			@user_collection.should_receive(:update).with(user_id, update)
+			expect(@user_collection).to receive(:update).with(user_id, update)
 
 			post "user/#{user_id}", update.to_json, headers
-			last_response.status.should == be_ok
+			expect(last_response.status).to eq 201
 		end
 
 		it 'updates non existing user entity' do
 			doc = {'not' => 'important'}
-			@user_collection.should_receive(:update).with(user_id, doc)
+			expect(@user_collection).to receive(:update).with(user_id, doc)
 				.and_raise(entity_not_found_error(user_id))
 
 			post "user/#{user_id}", doc.to_json, headers
@@ -369,11 +368,10 @@ describe Datanet::Skel::API_v1 do
 
 		it 'updates existing user entity with not correct values' do
 			mandatory_parameter_set_to_nil = {'first_name' => nil}
-			@user_collection.should_receive(:update).with(user_id, mandatory_parameter_set_to_nil)
-				.and_raise(Datanet::Skel::ValidationError.new)
+			expect(@user_collection).to receive(:update).with(user_id, mandatory_parameter_set_to_nil).and_raise(Datanet::Skel::ValidationError.new)
 
 			post "user/#{user_id}", mandatory_parameter_set_to_nil.to_json, headers
-			last_response.status.should == 422
+			expect(last_response.status).to eq 422
 			# TODO check validation error message
 		end
 	end
@@ -381,16 +379,15 @@ describe Datanet::Skel::API_v1 do
   describe 'PUT /:collection_name/:id' do
    it 'overwites existing user entity' do
       updated_user = {'first_name' => 'marek', 'age' => 31}
-      @user_collection.should_receive(:replace).with(user_id, updated_user)
-      .and_raise(entity_not_found_error(user_id))
+      expect(@user_collection).to receive(:replace).with(user_id, updated_user)
 
       put "user/#{user_id}", updated_user.to_json, headers
-      last_response.status.should == be_ok
+      expect(last_response.status).to eq 200
    end
 
    it 'overwrites non existing user entity' do
       doc = {'not' => 'important'}
-      @user_collection.should_receive(:replace).with(user_id, doc)
+      expect(@user_collection).to receive(:replace).with(user_id, doc)
       .and_raise(entity_not_found_error(user_id))
 
       put "user/#{user_id}", doc.to_json, headers
@@ -399,11 +396,10 @@ describe Datanet::Skel::API_v1 do
 
    it 'overwrites existing user entity with not correct values' do
       update_without_mandatory_param = {'age' => 31}
-      @user_collection.should_receive(:replace).with(user_id, update_without_mandatory_param)
-      .and_raise(Datanet::Skel::ValidationError.new)
+      expect(@user_collection).to receive(:replace).with(user_id, update_without_mandatory_param).and_raise(Datanet::Skel::ValidationError.new)
 
       put "user/#{user_id}", update_without_mandatory_param.to_json, headers
-      last_response.status.should == 422
+      expect(last_response.status).to eq 422
       # TODO check validation error message
    end
   end
@@ -417,25 +413,23 @@ describe Datanet::Skel::API_v1 do
 					"age" => {"type" => "integer"}
 				}
 			}
-			@user_collection.should_receive(:schema).and_return(schema)
+			expect(@user_collection).to receive(:schema).and_return(schema)
 
 			get 'user.schema', nil, headers
-			last_response.status.should == be_ok
-			JSON.parse(last_response.body).should == schema
+			expect(last_response.status).to eq 200
+			expect(json_response).to eq schema
 		end
 		it 'return 404 when schema is not found' do
-			@mapper.should_receive(:collection).with('non_existing')
-				.and_raise(Datanet::Skel::CollectionNotFoundException.new)
+			expect(@mapper).to receive(:collection).with('non_existing').and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
 			get 'non_existing.schema', nil, headers
-			last_response.status.should == 404
+			expect(last_response.status).to eq 404
 		end
 	end
 
 	def entity_not_found?(id)
-		last_response.status.should == 404
-		JSON.parse(last_response.body).should ==
-			{'message' => entity_not_found_message(id)}
+		expect(last_response.status).to eq 404
+		expect(json_response).to eq({'message' => entity_not_found_message(id)})
 	end
 
 	def entity_not_found_error(id)

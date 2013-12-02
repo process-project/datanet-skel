@@ -10,7 +10,7 @@ group :development, :test do
   gem 'pry'
 
   gem 'guard'
-  gem 'guard-rspec'
+  gem 'guard-rspec', '~>3.0.2'
 
   gem 'rspec'
   gem 'rspec-mocks'

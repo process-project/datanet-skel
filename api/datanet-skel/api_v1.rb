@@ -135,7 +135,7 @@ module Datanet
       end
 
       desc "Model entities."
-      resource '/' do
+      resource do
 
         desc "Get entity schema"
         params do
@@ -152,8 +152,9 @@ module Datanet
           requires :collection_name, :desc => 'Collection name'
         end
         get ":collection_name" do
-          if request.params.size > 0 then
-            collection.search(Datanet::Skel::Search.decode(request.params, collection))
+          query_hash = env["rack.request.query_hash"]
+          if query_hash.size > 0 then
+            collection.search(Datanet::Skel::Search.decode(query_hash, collection))
           else
             collection.index or []
           end
@@ -165,7 +166,7 @@ module Datanet
         end
         post ":collection_name" do
           logger.debug "Adding new entity into '#{params[:collection_name]}' collection"
-          collection.add(doc!, file_transmition)
+          {id: collection.add(doc!, file_transmition) }
         end
 
         desc "Get entity with given id"
@@ -194,7 +195,7 @@ module Datanet
         get ":collection_name/:id/:attr_name" do
            logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}//#{params[:attr_name]}"
            attr_value = entity![params[:attr_name]]
-           attr_value ? attr_value : attribute_not_found()
+           attr_value ? AttrWrapper.new(attr_value) : attribute_not_found()
         end
 
         desc "Delete entity with given id"
