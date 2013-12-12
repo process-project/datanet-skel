@@ -2,7 +2,7 @@ require 'net/sftp'
 require 'securerandom'
 require 'stringio'
 require 'datanet-skel/sftp_connection'
-
+require 'ruby-gridftp'
 
 module Datanet
   module Skel
@@ -13,56 +13,76 @@ module Datanet
         @folder_name = folder_name
       end
 
-      def generate_path conn
-        datanet_dir = "#{@path_prefix}/#{conn.sftp_user}/#{@folder_name}"
-        "#{datanet_dir}/#{generate_name}"
+      def dir_path proxy
+        "#{@path_prefix}/#{proxy.username}/#{@folder_name}"
       end
 
-      def store_payload(conn, payload, path = nil)
-        user_base = "#{@path_prefix}/#{conn.sftp_user}"
-        file_path = path.nil? ? generate_path(conn) : path
+      def generate_path proxy
+        datanet_dir = "#{dir_path(proxy)}/#{generate_name}"
+      end
 
-        conn.in_session do |sftp|
-          prepare_datanet_dir(sftp, user_base)
-          sftp.upload!(StringIO.new(payload), file_path)
+      def store_payload(proxy, payload_stream, path = nil)
+        puts "store payload"
+
+        dir = dir_path(proxy)
+        file_path = path.nil? ? generate_path(proxy) : path
+
+        gftp_client = GFTP::Client.new(proxy.proxy_payload)
+
+        in_base_dir(gftp_client, dir) do
+          upload(gftp_client, payload_stream, file_path)
         end
 
         file_path
       end
 
-      def delete_file(conn, file_path)
-        conn.in_session do |sftp|
-          sftp.remove!(file_path)
+      def delete_file(proxy, file_path)
+        gftp_client = GFTP::Client.new(proxy.proxy_payload)
+        gftp_client.delete file_path do |success|
+
         end
       end
 
-      CHUNK_SIZE = 100024
-
-      def get_file(conn, file_path)
-        payload = nil
-        conn.in_session do |sftp|
-          file = sftp.file.open(file_path, "r")
-          payload = file.read(CHUNK_SIZE) # TODO - use stream, read whole file
-          file.close
-        end
-        payload
+      def get_file(proxy, file_path, &block)
+        gftp_client = GFTP::Client.new(proxy.proxy_payload)
+        gftp_client.get(file_path, &block)
       end
 
       private
+
+      def in_base_dir(gftp_client, dir, &block)
+        puts "creating base dir"
+        gftp_client.exists dir do |exists|
+          if exists
+            yield
+          else
+            gftp_client.mkdir! dir do |created|
+              if created
+                yield
+              else
+                raise Datanet::Skel::FileStorageException.new "Unable to create #{dif}"
+              end
+            end
+          end
+        end
+      end
+
+      def upload(gftp_client, payload_stream, file_path)
+        buf = nil
+        gftp_client.put file_path do |buf_size|
+          buf = payload_stream.read(buf_size) unless buf
+
+          to_sent = buf
+          buf = payload_stream.read(buf_size)
+
+          [to_sent, buf != nil]
+        end
+      end
 
       # TODO insecure method - file may exist
       def generate_name
         uuid = SecureRandom.uuid
       end
-
-      def prepare_datanet_dir(sftp, user_base)
-        existing = false
-        sftp.dir.foreach(user_base) do |entry|
-          existing = true if entry.name === @folder_name
-        end
-        sftp.mkdir!("#{user_base}/#{@folder_name}") unless existing
-      end
-
     end
   end
 end

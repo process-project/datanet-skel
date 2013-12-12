@@ -14,7 +14,7 @@ describe Datanet::Skel::RepositoryAuth do
     end
 
     it 'allows anonymous access' do
-      expect(subject.authenticate(nil, nil)).to eq true
+      expect(subject.authenticate(nil)).to eq true
     end
   end
 
@@ -30,17 +30,20 @@ owners: ['marek', 'daniel']
     end
 
     it 'authenticate user if is on owners list and correct password' do
-      subject.authenticator.stub(:authenticate).with('marek', 'pass').and_return(true)
-      expect(subject.authenticate('marek', 'pass')).to eq true
+      subject.authenticator.stub(:username).with('creds').and_return('marek')
+      subject.authenticator.stub(:authenticate).with('creds').and_return(true)
+      expect(subject.authenticate('creds')).to eq true
     end
 
     it 'return false (Unauthorized) for owner with wrong password' do
-      subject.authenticator.stub(:authenticate).with('marek', 'wrong_pass').and_return(false)
-      expect(subject.authenticate('marek', 'wrong_pass')).to eq false
+      subject.authenticator.stub(:username).with('wrong_creds').and_return('marek')
+      subject.authenticator.stub(:authenticate).with('wrong_creds').and_return(false)
+      expect(subject.authenticate('wrong_creds')).to eq false
     end
 
     it 'return false (Unauthorized) for non repository owner' do
-      expect(subject.authenticate('not_owner', 'pass')).to eq false
+      subject.authenticator.stub(:username).with('not_owner_creds').and_return('not_owner')
+      expect(subject.authenticate('not_owner_creds')).to eq false
     end
 
     it 'return false (Unauthorized) when owners list empty' do
@@ -50,7 +53,8 @@ owners:
       CONFIG
       )
       subject.settings.reload!
-      expect(subject.authenticate('marek', 'pass')).to eq false
+      subject.authenticator.stub(:username).with('not_owner_creds').and_return('not_owner')
+      expect(subject.authenticate('not_owner_creds')).to eq false
     end
   end
 

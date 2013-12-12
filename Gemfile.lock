@@ -1,3 +1,16 @@
+GIT
+  remote: git@dev.cyfronet.pl:commons/grid-proxy.git
+  revision: c009a8c9697c55fe0c800375c866a61f6f3d39b6
+  specs:
+    grid-proxy (0.0.1)
+
+GIT
+  remote: git@dev.cyfronet.pl:commons/ruby-gridftp.git
+  revision: 034f51520642e98b737d99121cb5724ab284c6cb
+  specs:
+    ruby-gridftp (0.0.1)
+      ffi (~> 1.9, >= 1.9.3)
+
 PATH
   remote: .
   specs:
@@ -125,6 +138,7 @@ PLATFORMS
 
 DEPENDENCIES
   datanet-skel!
+  grid-proxy!
   guard
   guard-rspec (~> 3.0.2)
   libnotify
@@ -136,4 +150,5 @@ DEPENDENCIES
   rb-inotify
   rspec
   rspec-mocks
+  ruby-gridftp!
   shotgun

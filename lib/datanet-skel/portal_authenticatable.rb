@@ -12,9 +12,13 @@ module Datanet
         @portal_shared_key = portal_shared_key
       end
 
-      def authenticate(login, password)
-        status, token = plgrid_portal_auth(login, password)
+      def authenticate(creds)
+        status, token = plgrid_portal_auth(creds[:login], creds[:password])
         status
+      end
+
+      def username(creds)
+        creds[:login]
       end
 
       # Assuming we already know who's the user, we authenticate her again with the portal, to start a new session

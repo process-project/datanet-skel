@@ -3,6 +3,9 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in datanet-skel.gemspec
 gemspec
 
+gem 'grid-proxy', git: 'git@dev.cyfronet.pl:commons/grid-proxy.git'
+gem 'ruby-gridftp', git: 'git@dev.cyfronet.pl:commons/ruby-gridftp.git'
+
 group :development, :test do
   gem 'rake'
 

@@ -2,6 +2,7 @@ require 'datanet-skel/exceptions'
 require 'datanet-skel/multipart'
 require 'datanet-skel/file_transmition'
 require 'datanet-skel/sftp_connection'
+require 'base64'
 
 module Datanet
   module Skel
@@ -33,11 +34,23 @@ module Datanet
         Rack::Response.new([ "File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
       end
 
-      http_basic do |user,password|
-        API.auth ? API.auth.authenticate(user, password) : true
+      before do
+        error!('Unauthorized', 401) unless valid_credentials?
       end
 
       helpers do
+
+        def valid_credentials?
+          API.auth ? API.auth.authenticate(user_proxy) : true
+        end
+
+        def user_proxy
+          Base64.decode64(decoded_user_proxy) if decoded_user_proxy
+        end
+
+        def decoded_user_proxy
+          @decoded_grid_proxy ||= headers['Grid-Proxy'] || env["GRID_PROXY"]
+        end
 
         def storage_host
           API.storage_host
@@ -78,18 +91,8 @@ module Datanet
           params[:datanet_form_multipart] ||= Datanet::Skel::Multipart.new(env["rack.request.form_hash"]) if @request.form_data? && env["rack.request.form_hash"]
         end
 
-        def new_sftp_connection
-          raise Datanet::Skel::FileStorageException.new("File storage authentication is disabled for this repository.") unless API.auth_storage
-          user, password = credentials
-          Datanet::Skel::SftpConnection.new(storage_host, user, password)
-        end
-
-        def credentials
-          Rack::Auth::Basic::Request.new(env).credentials
-        end
-
         def file_transmition
-          Datanet::Skel::FileTransmition.new(new_sftp_connection, form_data.files) if form_data && form_data.files
+          Datanet::Skel::FileTransmition.new(user_proxy, form_data.files) if form_data && form_data.files
         end
 
         def collection
@@ -101,7 +104,7 @@ module Datanet
         end
 
         def file!
-          collection.get_file id, new_sftp_connection if file_request
+          collection.get_file id, user_proxy if file_request
         end
 
         def id
@@ -177,9 +180,15 @@ module Datanet
         get ":collection_name/:id" do
           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
           if file_request
-            payload, file_name = file!
+            file_entity = entity!
             header "Content-Type", "application/octet-stream"
-            header "Content-Disposition", "attachment;filename=\"#{file_name}\""
+            header "Content-Disposition", "attachment;filename=\"#{collection.get_filename(id)}\""
+
+            payload = ''
+            collection.get_file(id, user_proxy) do |data|
+              payload += data
+            end
+
             payload
           else
             entity!

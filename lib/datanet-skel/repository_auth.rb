@@ -3,8 +3,10 @@ module Datanet
     class RepositoryAuth
       attr_accessor :repo_secret_path, :settings, :authenticator
 
-      def authenticate(username, password)
-        public? || (owner?(username) and authenticator.authenticate(username, password))
+      def authenticate(creds)
+        return true if public?
+        username = authenticator.username(creds)
+        owner?(username) and authenticator.authenticate(creds)
       end
 
       def admin?(token)

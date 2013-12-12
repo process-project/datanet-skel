@@ -8,26 +8,27 @@ describe Datanet::Skel::API_v1 do
 
 	def app
     Datanet::Skel::API.auth_storage ||= double
+
 		Datanet::Skel::API
   end
 
-  def test_username
-    "test_username"
+  def grid_proxy
+    Base64.encode64(proxy_payload)
   end
 
-  def test_password
-    "test_password"
+  def proxy_payload
+    'grid_proxy_payload_base64_encoded_without_new_lines'
   end
 
   def headers(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
-     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("#{test_username}:#{test_password}"),
+     'GRID_PROXY' => grid_proxy,
      'CONTENT_TYPE' => "application/json"}.merge(options)
   end
 
   def headers_multipart(options={})
     {'HTTP_ACCEPT' => "application/vnd.datanet-v1+json",
-     'HTTP_AUTHORIZATION' => "Basic " + Base64.encode64("#{test_username}:#{test_password}"),
+     'GRID_PROXY' => grid_proxy,
      'CONTENT_TYPE' => "multipart/form-data; boundary=AaB03x",
     }.merge(options)
   end
@@ -229,9 +230,7 @@ describe Datanet::Skel::API_v1 do
     it 'adds entity with files' do
       expect(@user_collection).to receive(:add) do |doc, file_transmition|
         expect(doc["attr"]).to eq "value"
-        expect(file_transmition.sftp_connection.sftp_host).to eq app.storage_host
-        expect(file_transmition.sftp_connection.sftp_user).to eq  test_username
-        expect(file_transmition.sftp_connection.sftp_password).to eq  test_password
+        expect(file_transmition.proxy_payload).to eq proxy_payload
         neigh = file_transmition.files["neighbor"]
         expect(neigh).to_not be_nil
         expect(neigh[:filename]).to eq "picture.jpg"

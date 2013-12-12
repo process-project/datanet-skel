@@ -3,6 +3,7 @@ require 'delegate'
 require 'datanet-skel/transaction'
 require 'datanet-skel/file_storage'
 require 'datanet-skel/exceptions'
+require 'grid-proxy'
 
 module Datanet
   module Skel
@@ -68,6 +69,8 @@ module Datanet
       def add(json_doc, file_transmission = nil)
         Datanet::Skel::Transaction.new.in_transaction do |transaction|
           unless file_transmission.nil? ||  file_transmission.files.nil?
+            proxy = GP::Proxy.new file_transmission.proxy_payload
+
             file_transmission.files.each do |attr_name, file|
 
               unless json_doc["#{attr_name}"].nil?
@@ -75,23 +78,23 @@ module Datanet
               end
 
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
-                def initialize(transaction, file_storage, sftp_connection, payload_stream)
+                def initialize(transaction, file_storage, proxy, payload_stream)
                   @file_storage = file_storage
-                  @sftp_connection = sftp_connection
+                  @proxy = proxy
                   @payload_stream = payload_stream
                   @path = nil
                   super(transaction)
                 end
                 def action
-                  @path = @file_storage.generate_path @sftp_connection
-                  @file_storage.store_payload(@sftp_connection, @payload_stream.read, @path) # TODO pass payload as a stream not a string
+                  @path = @file_storage.generate_path @proxy
+                  @file_storage.store_payload(@proxy, @payload_stream, @path) # TODO pass payload as a stream not a string
                 rescue Exception => e
                   raise Datanet::Skel::FileStorageException.new(e)
                 end
                 def rollback
-                  @file_storage.delete_file(@sftp_connection, @path) if @path
+                  @file_storage.delete_file(@proxy, @path) if @path
                 end
-              end.new(transaction, @file_storage, file_transmission.sftp_connection, file[:payload_stream])
+              end.new(transaction, @file_storage, proxy, file[:payload_stream])
 
               path = file_upload.run_action
 
@@ -170,14 +173,14 @@ module Datanet
     end
 
     class FileEntityDecorator < EntityDecorator
-      def get_file id, connection
+      def get_filename(id)
+        get(id)['file_name']
+      end
+
+      def get_file(id, proxy_payload, &block)
         file_entity = get(id)
-        begin
-          payload = @file_storage.get_file(connection, file_entity['file_path'])
-        rescue Exception => e
-          raise Datanet::Skel::FileStorageException.new(e)
-        end
-        [ payload , file_entity['file_name'] ]
+        proxy = GP::Proxy.new proxy_payload
+        @file_storage.get_file(proxy, file_entity['file_path'], &block)
       end
     end
 
