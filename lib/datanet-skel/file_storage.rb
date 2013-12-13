@@ -31,13 +31,17 @@ module Datanet
       def delete_file(proxy, file_path)
         gftp_client = GFTP::Client.new(proxy.proxy_payload)
         gftp_client.delete file_path do |success|
-          raise Datanet::Skel::FileStorageException.new("Unable to delete file #{file_path}") unless success
+          raise Datanet::Skel::FileStorageException.new("Unable to delete #{file_path} file") unless success
         end
       end
 
       def get_file(proxy, file_path, &block)
         gftp_client = GFTP::Client.new(proxy.proxy_payload)
-        gftp_client.get(file_path, &block)
+        begin
+          gftp_client.get(file_path, &block)
+        rescue
+          raise Datanet::Skel::FileStorageException.new("Unable to read #{file_path} file")
+        end
       end
 
       private
