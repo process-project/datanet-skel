@@ -13,14 +13,6 @@ module Datanet
         @folder_name = folder_name
       end
 
-      def dir_path proxy
-        "#{@path_prefix}/#{proxy.username}/#{@folder_name}"
-      end
-
-      def generate_path proxy
-        datanet_dir = "#{dir_path(proxy)}/#{generate_name}"
-      end
-
       def store_payload(proxy, payload_stream, path = nil)
         puts "store payload"
 
@@ -39,7 +31,7 @@ module Datanet
       def delete_file(proxy, file_path)
         gftp_client = GFTP::Client.new(proxy.proxy_payload)
         gftp_client.delete file_path do |success|
-
+          raise Datanet::Skel::FileStorageException.new("Unable to delete file #{file_path}") unless success
         end
       end
 
@@ -49,6 +41,14 @@ module Datanet
       end
 
       private
+
+      def dir_path proxy
+        "#{@path_prefix}/#{proxy.username}/#{@folder_name}"
+      end
+
+      def generate_path proxy
+        datanet_dir = "#{dir_path(proxy)}/#{generate_name}"
+      end
 
       def in_base_dir(gftp_client, dir, &block)
         puts "creating base dir"
