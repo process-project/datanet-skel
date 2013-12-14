@@ -18,7 +18,50 @@ describe Datanet::Skel::FileStorage do
   subject { Datanet::Skel::FileStorage.new(base_path, folder_name) }
 
   describe '#store_payload' do
+    let(:payload_stream) { double }
 
+    context 'when base directory exists' do
+      before do
+        expect(gftp_client).to receive(:exists).with(full_path).and_yield(true)
+        expect(gftp_client).to_not receive(:mkdir!)
+        expect(gftp_client).to receive(:put).and_yield(1)
+        expect(payload_stream).to receive(:read).with(1).twice
+      end
+
+      it 'uploads payload stream' do
+        subject.store_payload(proxy, payload_stream)
+      end
+    end
+
+    context 'when base directory does not exist' do
+      before do
+        expect(gftp_client).to receive(:exists).with(full_path).and_yield(false)
+      end
+
+      context 'and it is possible to create missing directory' do
+        before do
+          expect(gftp_client).to receive(:mkdir!).with(full_path).and_yield(true)
+          expect(gftp_client).to receive(:put).and_yield(1)
+          expect(payload_stream).to receive(:read).with(1).twice
+        end
+
+        it 'uploads payload stream' do
+          subject.store_payload(proxy, payload_stream)
+        end
+      end
+
+      context 'and unable to create missing directory' do
+        before do
+          expect(gftp_client).to receive(:mkdir!).with(full_path).and_yield(false)
+        end
+
+        it 'throws storage exception' do
+          expect {
+            subject.store_payload(proxy, payload_stream)
+          }.to raise_error(Datanet::Skel::FileStorageException, "Unable to create #{full_path}")
+        end
+      end
+    end
   end
 
   describe '#delete_file' do

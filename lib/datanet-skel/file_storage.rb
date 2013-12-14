@@ -14,8 +14,6 @@ module Datanet
       end
 
       def store_payload(proxy, payload_stream, path = nil)
-        puts "store payload"
-
         dir = dir_path(proxy)
         file_path = path.nil? ? generate_path(proxy) : path
 
@@ -55,7 +53,6 @@ module Datanet
       end
 
       def in_base_dir(gftp_client, dir, &block)
-        puts "creating base dir"
         gftp_client.exists dir do |exists|
           if exists
             yield
@@ -64,7 +61,7 @@ module Datanet
               if created
                 yield
               else
-                raise Datanet::Skel::FileStorageException.new "Unable to create #{dif}"
+                raise Datanet::Skel::FileStorageException.new "Unable to create #{dir}"
               end
             end
           end
