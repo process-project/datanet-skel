@@ -1,7 +1,6 @@
 require 'datanet-skel/exceptions'
 require 'datanet-skel/multipart'
 require 'datanet-skel/file_transmition'
-require 'datanet-skel/sftp_connection'
 require 'base64'
 
 module Datanet

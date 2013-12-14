@@ -1,7 +1,5 @@
-require 'net/sftp'
 require 'securerandom'
 require 'stringio'
-require 'datanet-skel/sftp_connection'
 require 'ruby-gridftp'
 
 module Datanet
