@@ -8,7 +8,6 @@ module Datanet
     autoload :APIHelpers,                   'datanet-skel/helper'
     autoload :MapperDecorator,              'datanet-skel/decorator'
     autoload :RelationInspector,            'datanet-skel/relation_inspector'
-    autoload :PortalAuthenticatable,        'datanet-skel/portal_authenticatable'
     autoload :RepositoryAuth,               'datanet-skel/repository_auth'
     autoload :GridProxyAuth,                'datanet-skel/grid_proxy_auth'
     autoload :Search,                       'datanet-skel/search'
