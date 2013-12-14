@@ -126,14 +126,13 @@ describe Datanet::Skel::EntityDecorator do
       valid_entity = {'first_name' => 'marek'}
 
       payload = double
-      payload.should_receive(:read).twice.and_return('payload')
 
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload }}
       file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(kind_of(GP::Proxy), payload.read, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(kind_of(GP::Proxy), payload, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
@@ -151,7 +150,6 @@ describe Datanet::Skel::EntityDecorator do
       valid_entity = {'first_name' => 'marek', 'avatar2' => 'this_is_a_cause_of_failure' }
 
       payload = double
-      payload.should_receive(:read).exactly(2).times.and_return('payload')
 
       files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload },
        'avatar2' => { :filename => 'marek_photo2.jpg', :payload_stream => payload }
@@ -160,7 +158,7 @@ describe Datanet::Skel::EntityDecorator do
 
       file_path = "/some/path/on/sftp"
       file_storage.should_receive(:generate_path).and_return(file_path)
-      file_storage.should_receive(:store_payload).with(kind_of(GP::Proxy), payload.read, file_path).and_return(file_path)
+      file_storage.should_receive(:store_payload).with(kind_of(GP::Proxy), payload, file_path).and_return(file_path)
 
       file_collection = double
       mapper_decorator.should_receive(:collection).with('file').and_return(file_collection)
