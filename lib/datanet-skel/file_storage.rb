@@ -40,14 +40,14 @@ module Datanet
         end
       end
 
+      def generate_path proxy
+        datanet_dir = "#{dir_path(proxy)}/#{generate_name}"
+      end
+
       private
 
       def dir_path proxy
         "#{@path_prefix}/#{proxy.username}/#{@folder_name}"
-      end
-
-      def generate_path proxy
-        datanet_dir = "#{dir_path(proxy)}/#{generate_name}"
       end
 
       def in_base_dir(gftp_client, dir, &block)
