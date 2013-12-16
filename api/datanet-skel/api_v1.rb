@@ -2,10 +2,12 @@ require 'datanet-skel/exceptions'
 require 'datanet-skel/multipart'
 require 'datanet-skel/file_transmition'
 require 'base64'
+require 'rack/stream'
 
 module Datanet
   module Skel
     class API_v1 < Grape::API
+
       version 'v1', :using => :header, :vendor => 'datanet'
 
       format :json
@@ -38,6 +40,7 @@ module Datanet
       end
 
       helpers do
+        include Rack::Stream::DSL
 
         def valid_credentials?
           API.auth ? API.auth.authenticate(user_proxy) : true
@@ -179,16 +182,17 @@ module Datanet
         get ":collection_name/:id" do
           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
           if file_request
+            after_open do
+              collection.get_file(id, user_proxy) do |data|
+                chunk data
+              end
+              close
+            end
+
             file_entity = entity!
             header "Content-Type", "application/octet-stream"
             header "Content-Disposition", "attachment;filename=\"#{collection.get_filename(id)}\""
-
-            payload = ''
-            collection.get_file(id, user_proxy) do |data|
-              payload += data
-            end
-
-            payload
+            status 200
           else
             entity!
           end

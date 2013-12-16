@@ -18,6 +18,7 @@ PATH
       grape (= 0.6.0)
       json
       json-schema
+      rack-stream
       settingslogic
       sinatra
 
@@ -34,17 +35,21 @@ GEM
     axiom-types (0.0.5)
       descendants_tracker (~> 0.0.1)
       ice_nine (~> 0.9)
-    backports (3.3.5)
     builder (3.2.2)
     celluloid (0.15.2)
       timers (~> 1.1.0)
     coderay (1.1.0)
-    coercible (0.2.0)
-      backports (~> 3.0, >= 3.1.0)
+    coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
     descendants_tracker (0.0.3)
     diff-lcs (1.2.5)
+    em-synchrony (1.0.3)
+      eventmachine (>= 1.0.0.beta.1)
     equalizer (0.0.8)
+    eventmachine (1.0.3)
+    faye-websocket (0.7.1)
+      eventmachine (>= 0.12.0)
+      websocket-driver (>= 0.3.1)
     ffi (1.9.3)
     formatador (0.2.4)
     grape (0.6.0)
@@ -93,6 +98,11 @@ GEM
       rack (>= 1.0.0)
     rack-protection (1.5.1)
       rack
+    rack-stream (0.0.5)
+      em-synchrony
+      eventmachine
+      faye-websocket
+      rack
     rack-test (0.6.2)
       rack (>= 1.0)
     rake (10.1.0)
@@ -123,11 +133,12 @@ GEM
     tilt (1.4.1)
     timers (1.1.0)
     tzinfo (0.3.38)
-    virtus (1.0.0)
+    virtus (1.0.1)
       axiom-types (~> 0.0.5)
-      coercible (~> 0.2)
+      coercible (~> 1.0)
       descendants_tracker (~> 0.0.1)
       equalizer (~> 0.0.7)
+    websocket-driver (0.3.1)
 
 PLATFORMS
   ruby
