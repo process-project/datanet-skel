@@ -6,7 +6,7 @@ GIT
 
 GIT
   remote: git@dev.cyfronet.pl:commons/ruby-gridftp.git
-  revision: 034f51520642e98b737d99121cb5724ab284c6cb
+  revision: 7a1aa9adbbc1f5f51373154e1ce061ac0da9882f
   specs:
     ruby-gridftp (0.0.1)
       ffi (~> 1.9, >= 1.9.3)
