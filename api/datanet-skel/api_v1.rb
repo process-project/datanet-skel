@@ -183,16 +183,19 @@ module Datanet
           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
           if file_request
             after_open do
-              collection.get_file(id, user_proxy) do |data|
-                chunk data
+              Thread.new do
+                collection.get_file(id, user_proxy) do |data|
+                  chunk data
+                end
+                close
               end
-              close
             end
 
             file_entity = entity!
+            status 200
+            header 'Content-Type', 'application/json'
             header "Content-Type", "application/octet-stream"
             header "Content-Disposition", "attachment;filename=\"#{collection.get_filename(id)}\""
-            status 200
           else
             entity!
           end
