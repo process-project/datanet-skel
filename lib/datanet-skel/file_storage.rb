@@ -74,7 +74,7 @@ module Datanet
           to_sent = buf
           buf = payload_stream.read(buf_size)
 
-          [to_sent, buf != nil]
+          [to_sent, !buf]
         end
       end
 
