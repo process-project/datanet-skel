@@ -1,4 +1,19 @@
 require 'grape'
+require 'grape/middleware/formatter'
+
+class Grape::Middleware::Formatter
+
+  alias_method :old_after, :after
+
+  def after
+    status, headers, bodies = *@app_response
+    if headers["Content-Type"] == 'application/octet-stream'
+      Rack::Response.new(bodies.first, status, headers).to_a
+    else
+      old_after
+    end
+  end
+end
 
 module Datanet
   module Skel

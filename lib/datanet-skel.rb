@@ -1,4 +1,5 @@
 require "datanet-skel/version"
+# require 'grape_formatter'
 
 module Datanet
   module Skel
@@ -12,6 +13,7 @@ module Datanet
     autoload :GridProxyAuth,                'datanet-skel/grid_proxy_auth'
     autoload :Search,                       'datanet-skel/search'
     autoload :AttrWrapper,                  'datanet-skel/attr_wrapper'
+    autoload :StreamingBody,                'datanet-skel/streaming_body'
 
     autoload :CollectionNotFoundException,  'datanet-skel/exceptions'
     autoload :EntityNotFoundException,      'datanet-skel/exceptions'

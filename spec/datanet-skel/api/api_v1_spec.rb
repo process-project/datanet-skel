@@ -39,11 +39,15 @@ describe Datanet::Skel::API_v1 do
     StringIO.new(data)
   end
 
+  let(:file_collection) { double('file collection') }
+
   before(:each) do
 		@user_collection = double(Datanet::Skel::CollectionMock)
 		@mapper = double(Datanet::Skel::MapperMock)
-		@mapper.stub(:collection).with('user')
+		allow(@mapper).to receive(:collection).with('user')
 			.and_return(@user_collection)
+    allow(@mapper).to receive(:collection).with('file')
+      .and_return(file_collection)
 
 		Datanet::Skel::API.mapper = @mapper
 	end
@@ -307,6 +311,14 @@ describe Datanet::Skel::API_v1 do
 
       get "user/#{user_id}", nil, headers
       entity_not_found?(user_id)
+    end
+
+    it 'gets file' do
+      expect(file_collection).to receive(:get_file).with('id', proxy_payload).and_yield('ala ').and_yield('ma ').and_yield('kota')
+      allow(file_collection).to receive(:get_filename).with('id').and_return('sample_file.txt')
+
+      get "file/id", nil, headers
+      expect(last_response.body).to eq 'ala ma kota'
     end
   end
 

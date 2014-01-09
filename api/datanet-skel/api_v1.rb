@@ -182,20 +182,11 @@ module Datanet
         get ":collection_name/:id" do
           logger.debug "Getting #{params[:collection_name]}/#{params[:_id]}"
           if file_request
-            after_open do
-              Thread.new do
-                collection.get_file(id, user_proxy) do |data|
-                  chunk data
-                end
-                close
-              end
-            end
-
-            file_entity = entity!
+            logger.debug "Getting file"
             status 200
-            header 'Content-Type', 'application/json'
             header "Content-Type", "application/octet-stream"
             header "Content-Disposition", "attachment;filename=\"#{collection.get_filename(id)}\""
+            Datanet::Skel::StreamingBody.new(collection, id, user_proxy)
           else
             entity!
           end

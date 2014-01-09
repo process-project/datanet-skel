@@ -67,6 +67,7 @@ module Datanet
       end
 
       def upload(gftp_client, payload_stream, file_path)
+
         buf = nil
         gftp_client.put file_path do |buf_size|
           buf = payload_stream.read(buf_size) unless buf
