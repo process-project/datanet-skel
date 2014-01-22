@@ -54,10 +54,6 @@ module Datanet
           @decoded_grid_proxy ||= headers['Grid-Proxy'] || env["GRID_PROXY"]
         end
 
-        def storage_host
-          API.storage_host
-        end
-
         def mapper
           API.mapper
         end
