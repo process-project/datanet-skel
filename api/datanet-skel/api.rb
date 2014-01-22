@@ -8,7 +8,7 @@ class Grape::Middleware::Formatter
   def after
     status, headers, bodies = *@app_response
     if headers["Content-Type"] == 'application/octet-stream'
-      Rack::Response.new(bodies.first, status, headers).to_a
+      [status, headers, bodies.first]
     else
       old_after
     end
