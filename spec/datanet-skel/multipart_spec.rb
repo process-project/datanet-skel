@@ -96,4 +96,11 @@ describe Rack::Multipart do
     obj.metadata.should_not be_nil
     obj.metadata.should eq ({ "attr1" => "value1", "attr2" => "value2" }.to_json)
   end
+
+  it "returns {} when no metadata" do
+    env = Rack::MockRequest.env_for("/", multipart_fixture(:message_no_meta))
+    params = Rack::Utils::Multipart.parse_multipart(env)
+    obj = Datanet::Skel::Multipart.new(params)
+    expect(obj.metadata).to eq "{}"
+  end
 end

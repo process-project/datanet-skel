@@ -9,7 +9,7 @@ module Datanet
       #         and Hash { :filename => filename, :payload => payload } as a value
       # metadata - metadata as a String
 
-      attr_accessor :files, :metadata
+      attr_accessor :files
 
       def initialize(params)
         @files = nil
@@ -63,6 +63,9 @@ module Datanet
         @files[key] = file_data
       end
 
+      def metadata
+        @metadata || "{}"
+      end
     end
   end
 end
