@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'base64'
 require 'datanet-skel/file_transmition'
+require 'open-uri'
 
 describe Datanet::Skel::API_v1 do
 	include Rack::Test::Methods
@@ -113,6 +114,14 @@ describe Datanet::Skel::API_v1 do
         get 'user?name=marek', nil, headers
         expect(last_response.status).to eq 200
         expect(json_response).to eq ids
+      end
+
+      it 'removes grid_proxy query param and use it to authenticate' do
+        ids = ['1', '2']
+        expect(@user_collection).to receive(:search).with({"name" => "marek"}).and_return(ids)
+
+        get "user?name=marek&grid_proxy=#{URI::encode(proxy_payload)}"
+        expect(last_response.status).to eq 200
       end
 
       it 'gets entities ids using complex (AND) query' do
@@ -313,12 +322,21 @@ describe Datanet::Skel::API_v1 do
       entity_not_found?(user_id)
     end
 
-    it 'gets file' do
-      expect(file_collection).to receive(:get_file).with('id', proxy_payload).and_yield('ala ').and_yield('ma ').and_yield('kota')
-      allow(file_collection).to receive(:get_filename).with('id').and_return('sample_file.txt')
+    context 'when file entity' do
+      before do
+        expect(file_collection).to receive(:get_file).with('id', proxy_payload).and_yield('ala ').and_yield('ma ').and_yield('kota')
+        allow(file_collection).to receive(:get_filename).with('id').and_return('sample_file.txt')
+      end
 
-      get "file/id", nil, headers
-      expect(last_response.body).to eq 'ala ma kota'
+      it 'gets file' do
+        get "file/id", nil, headers
+        expect(last_response.body).to eq 'ala ma kota'
+      end
+
+      it 'can pass grid_proxy as a query param' do
+        get "file/id?grid_proxy=#{URI::encode(proxy_payload)}"
+        expect(last_response.status).to eq 200
+      end
     end
   end
 

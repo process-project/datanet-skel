@@ -47,11 +47,11 @@ module Datanet
         end
 
         def user_proxy
-          Base64.decode64(decoded_user_proxy) if decoded_user_proxy
+          (Base64.decode64(decoded_user_proxy) if decoded_user_proxy) || env['rack.request.query_hash']['grid_proxy']
         end
 
         def decoded_user_proxy
-          @decoded_grid_proxy ||= headers['Grid-Proxy'] || env["GRID_PROXY"]
+          @decoded_grid_proxy ||= headers['Grid-Proxy'] || env['GRID_PROXY']
         end
 
         def mapper
@@ -153,7 +153,8 @@ module Datanet
           requires :collection_name, :desc => 'Collection name'
         end
         get ":collection_name" do
-          query_hash = env["rack.request.query_hash"]
+          query_hash = env["rack.request.query_hash"].dup
+          query_hash.delete('grid_proxy')
           if query_hash.size > 0 then
             collection.search(Datanet::Skel::Search.decode(query_hash, collection))
           else
