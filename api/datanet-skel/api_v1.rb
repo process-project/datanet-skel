@@ -3,6 +3,7 @@ require 'datanet-skel/multipart'
 require 'datanet-skel/file_transmition'
 require 'base64'
 require 'rack/stream'
+require 'rack/utils'
 
 module Datanet
   module Skel
@@ -32,7 +33,7 @@ module Datanet
       end
 
       rescue_from Datanet::Skel::FileStorageException do |e|
-        Rack::Response.new([ "File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
+        Rack::Response.new(["File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
       end
 
       before do
@@ -46,8 +47,12 @@ module Datanet
           API.auth ? API.auth.authenticate(user_proxy) : true
         end
 
+        def query_grid_proxy
+          Rack::Utils.parse_nested_query(env['QUERY_STRING'])['grid_proxy']
+        end
+
         def user_proxy
-          (Base64.decode64(decoded_user_proxy) if decoded_user_proxy) || env['rack.request.query_hash']['grid_proxy']
+          (Base64.decode64(decoded_user_proxy) if decoded_user_proxy) || query_grid_proxy
         end
 
         def decoded_user_proxy
