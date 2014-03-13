@@ -4,6 +4,7 @@ require 'datanet-skel/file_transmition'
 require 'base64'
 require 'rack/stream'
 require 'rack/utils'
+require 'ruby-gridftp'
 
 module Datanet
   module Skel
