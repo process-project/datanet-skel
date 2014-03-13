@@ -36,6 +36,10 @@ module Datanet
         Rack::Response.new(["File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
       end
 
+      rescue_from GFTP::GlobusError do |e|
+        Rack::Response.new(["Grid FTP error: #{e.message.nil? ? e.class : e.message}"], 403)
+      end
+
       before do
         error!('Unauthorized', 401) unless valid_credentials?
       end
