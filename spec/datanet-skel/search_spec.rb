@@ -96,6 +96,11 @@ describe Datanet::Skel::Search do
         result = subject.decode({'tags' => 't1,t2,t3'}, collection)
         result['tags'].should == {value: ['t1', 't2', 't3'], operator: :contains}
       end
+
+      it 'does not takes nil into account' do
+        result = subject.decode({'tags' => ['a', nil, 'b']}, collection)
+        expect(result['tags']).to eq [{:value=>['a'], :operator=>:contains}, {:value=>['b'], :operator=>:contains}]
+      end
     end
   end
 

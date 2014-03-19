@@ -12,7 +12,7 @@ module Datanet
           else
             v = [v] unless v.instance_of? Array
             values = []
-            v.each do |element|
+            v.reject(&:nil?).each do |element|
               values << case attr_type
                           when :number  then number_operator(element)
                           when :integer then number_operator(element)
