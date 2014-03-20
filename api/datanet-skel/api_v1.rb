@@ -41,8 +41,19 @@ module Datanet
         Rack::Response.new(["Grid FTP error: #{e.message.nil? ? e.class : e.message}"], 403)
       end
 
+      rescue_from Datanet::Skel::Unauthenticated do |e|
+        Rack::Response.new([e.message], 401)
+      end
+
+      rescue_from Datanet::Skel::Unauthorized do |e|
+        Rack::Response.new([e.message], 403)
+      end
+
       before do
-        error!('Unauthorized', 401) unless valid_credentials?
+        if API.auth
+          API.auth.authenticate!(user_proxy)
+          API.auth.authorize!(user_proxy)
+        end
       end
 
       helpers do

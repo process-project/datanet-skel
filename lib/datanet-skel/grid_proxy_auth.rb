@@ -22,7 +22,8 @@ module Datanet
       def rescue_block(exception_response)
         begin
           yield
-        rescue
+        rescue Exception => e
+          API.logger.debug "Wrong proxy: #{e}"
           exception_response
         end
       end

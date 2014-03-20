@@ -20,5 +20,8 @@ module Datanet
     autoload :ValidationError,              'datanet-skel/exceptions'
     autoload :WrongModelLocationError,      'datanet-skel/exceptions'
     autoload :FileStorageException,         'datanet-skel/exceptions'
+
+    autoload :Unauthenticated,              'datanet-skel/exceptions'
+    autoload :Unauthorized,                 'datanet-skel/exceptions'
   end
 end

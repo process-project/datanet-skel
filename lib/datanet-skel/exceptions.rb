@@ -6,5 +6,8 @@ module Skel
   class ValidationError < Exception; end
   class WrongModelLocationError < Exception; end
   class FileStorageException < Exception; end
+
+  class Unauthenticated < Exception; end
+  class Unauthorized < Exception; end
 end
 end

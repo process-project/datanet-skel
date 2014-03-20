@@ -3,10 +3,17 @@ module Datanet
     class RepositoryAuth
       attr_accessor :repo_secret_path, :settings, :authenticator
 
-      def authenticate(creds)
-        return true if public?
-        username = authenticator.username(creds)
-        owner?(username) and authenticator.authenticate(creds)
+      def authenticate!(creds)
+        unauthenticate!('Valid proxy is required to access the repository') if creds.nil? || creds.empty?
+        unauthenticate!('Given user proxy is invalid') unless authenticator.authenticate(creds)
+      end
+
+      def authorize!(creds)
+        unauthorize!('You are not allowed to read/write to this repository') unless authorized?(creds)
+      end
+
+      def authorized?(creds)
+        public? || owner?(authenticator.username(creds))
       end
 
       def admin?(token)
@@ -26,6 +33,14 @@ module Datanet
       end
 
       private
+
+      def unauthenticate!(msg)
+        raise Datanet::Skel::Unauthenticated.new(msg)
+      end
+
+      def unauthorize!(msg)
+        raise Datanet::Skel::Unauthorized.new(msg)
+      end
 
       def update_settings(key, value)
         data = YAML.load_file settings.config_file
