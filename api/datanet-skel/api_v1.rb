@@ -229,7 +229,7 @@ module Datanet
         end
         delete ":collection_name/:id" do
           collection.remove id
-          nil
+          {}
         end
 
         desc "Update entity with given id"
@@ -239,7 +239,7 @@ module Datanet
         end
         post ":collection_name/:id" do
           collection.update id, doc!
-          nil
+          {}
         end
 
         desc "Replace entity with given id"
@@ -249,7 +249,7 @@ module Datanet
         end
         put ":collection_name/:id" do
           collection.replace id, doc!
-          nil
+          {}
         end
       end
     end
