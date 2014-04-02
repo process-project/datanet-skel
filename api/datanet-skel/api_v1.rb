@@ -100,7 +100,7 @@ module Datanet
                         v
                       end
             rescue
-              hash[k] = v
+              hsh[k] = v
             end
             hsh
           end
