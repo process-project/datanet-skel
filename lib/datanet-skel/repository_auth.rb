@@ -1,7 +1,7 @@
 module Datanet
   module Skel
     class RepositoryAuth
-      attr_accessor :repo_secret_path, :settings, :authenticator
+      attr_accessor :repo_secret_path, :settings, :authenticator, :cors
 
       def authenticate!(creds)
         unauthenticate!('Valid proxy is required to access the repository') if creds.nil? || creds.empty?
@@ -26,6 +26,15 @@ module Datanet
 
       def owners=(owners)
         update_settings("owners", owners)
+      end
+
+      def cors_origins=(cors_origins)
+        update_settings("cors_origins", cors_origins)
+        update_cors if cors
+      end
+
+      def cors_origins
+        settings['cors_origins'] || []
       end
 
       def configuration
@@ -68,6 +77,10 @@ module Datanet
 
       def secret
         @secret ||= File.read(repo_secret_path).chomp
+      end
+
+      def update_cors
+        cors.origins(*(cors_origins))
       end
     end
   end

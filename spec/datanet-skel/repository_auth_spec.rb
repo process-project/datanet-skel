@@ -102,6 +102,22 @@ owners:
 
       expect(config_file_content).to include('other_prop: value')
     end
+
+    it 'updates cors origins' do
+      new_origins = ['a.pl', 'b.pl']
+      cors = double
+      subject.cors = cors
+      expect(cors).to receive(:origins).with(*new_origins)
+
+      subject.cors_origins = new_origins
+      config_file_content = File.read(subject.settings.config_file).chomp
+
+      expect(config_file_content).to include('cors_origins:')
+      expect(config_file_content).to include('- a.pl')
+      expect(config_file_content).to include('- b.pl')
+
+      expect(subject.settings.cors_origins).to eq ['a.pl', 'b.pl']
+    end
   end
 
   describe 'admin authorization' do

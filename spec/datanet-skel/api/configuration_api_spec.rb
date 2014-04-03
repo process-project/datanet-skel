@@ -14,7 +14,7 @@ describe Datanet::Skel::ConfigurationApi do
 
   before do
     Datanet::Skel::API.auth = double
-    Datanet::Skel::API.auth.stub(:configuration).and_return({repository_type: :private, owners: ['marek', 'daniel']})
+    Datanet::Skel::API.auth.stub(:configuration).and_return({repository_type: :private, owners: ['marek', 'daniel'], cors_origins: ['a.pl', 'b.pl']})
     Datanet::Skel::API.auth.stub(:admin?).with('secret').and_return(true)
     Datanet::Skel::API.auth.stub(:admin?).with(nil).and_return(false)
   end
@@ -24,7 +24,7 @@ describe Datanet::Skel::ConfigurationApi do
       it 'returns configuration' do
         get authorized_path
         expect(last_response.status).to eq 200
-        json_response.should == {'repository_type' => 'private', 'owners' => ['marek', 'daniel']}
+        json_response.should == {'repository_type' => 'private', 'owners' => ['marek', 'daniel'], 'cors_origins' => ['a.pl', 'b.pl']}
       end
 
       it 'returns 401 (Unauthorized) when no private_token' do
@@ -46,7 +46,7 @@ describe Datanet::Skel::ConfigurationApi do
   describe 'PUT _configuration' do
     context 'when auth defined' do
       it 'updates repository repository_type' do
-        Datanet::Skel::API.auth.should_receive(:repository_type=).with(:private)
+        expect(Datanet::Skel::API.auth).to receive(:repository_type=).with(:private)
 
         put authorized_path, {repository_type: :private}
         expect(last_response.status).to eq 200
@@ -54,10 +54,17 @@ describe Datanet::Skel::ConfigurationApi do
 
       it 'updates owners list' do
         owners = ['marek', 'daniel']
-        Datanet::Skel::API.auth.should_receive(:owners=).with(owners)
+        expect(Datanet::Skel::API.auth).to receive(:owners=).with(owners)
 
         put authorized_path, {owners: owners}
         expect(last_response.status).to eq 200
+      end
+
+      it 'updates cors origins list' do
+        cors_origins = ['a.pl', 'b.pl']
+        expect(Datanet::Skel::API.auth).to receive(:cors_origins=).with(cors_origins)
+
+        put authorized_path, {cors_origins: cors_origins}
       end
 
       it 'returns 401 (Unauthorized) when no private_token' do

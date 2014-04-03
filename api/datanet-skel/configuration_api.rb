@@ -25,9 +25,10 @@ module Datanet
         end
 
         put do
-          attrs = attributes_for_keys [:repository_type, :owners]
+          attrs = attributes_for_keys [:repository_type, :owners, :cors_origins]
           API.auth.repository_type = attrs[:repository_type].to_sym if attrs[:repository_type]
           API.auth.owners = attrs[:owners] if attrs[:owners]
+          API.auth.cors_origins = attrs[:cors_origins] if attrs[:cors_origins]
           API.auth.configuration
         end
       end
