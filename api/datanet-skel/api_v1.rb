@@ -30,23 +30,27 @@ module Datanet
       end
 
       rescue_from Datanet::Skel::ValidationError do |e|
-        Rack::Response.new([e.message], 422)
+        rack_response({:message => e.message}.to_json, 422)
       end
 
       rescue_from Datanet::Skel::FileStorageException do |e|
-        Rack::Response.new(["File storage error: #{e.message.nil? ? e.class : e.message}"], 422)
+        rack_response({:message => "File storage error: #{e.message.nil? ? e.class : e.message}"}.to_json, 422)
       end
 
       rescue_from GFTP::GlobusError do |e|
-        Rack::Response.new(["Grid FTP error: #{e.message.nil? ? e.class : e.message}"], 403)
+        rack_response({:message => "Grid FTP error: #{e.message.nil? ? e.class : e.message}"}.to_json, 403)
       end
 
       rescue_from Datanet::Skel::Unauthenticated do |e|
-        Rack::Response.new([e.message], 401)
+        rack_response({:message => e.message}.to_json, 401)
       end
 
       rescue_from Datanet::Skel::Unauthorized do |e|
-        Rack::Response.new([e.message], 403)
+        rack_response({:message => e.message}.to_json, 403)
+      end
+
+      rescue_from Exception do |e|
+        rack_response({:message => 'Internal application error, please contact Datanet administrator'}.to_json, 500)
       end
 
       before do

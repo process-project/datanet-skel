@@ -237,7 +237,7 @@ describe Datanet::Skel::API_v1 do
 
 			post 'user', new_user.to_json, headers
 			expect(last_response.status).to eq 422
-			expect(last_response.body).to eq 'error message'
+			expect(json_response).to eq({'message' => 'error message'})
     end
 
     it 'adds entity with files' do
