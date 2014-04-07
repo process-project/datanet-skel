@@ -113,7 +113,7 @@ module Datanet
                 def rollback
                   @decorated_mapper.collection('file').remove(@file_id) unless @file_id.nil?
                 end
-              end.new(transaction, file[:filename], path, @decorated_mapper)
+              end.new(transaction, sanitize_filename(file[:filename]), path, @decorated_mapper)
 
               json_doc["#{attr_name}"] = file_to_db.run_action
             end
@@ -155,6 +155,10 @@ module Datanet
       end
 
     private
+
+      def sanitize_filename(filename)
+        filename.gsub("\n", '_')
+      end
 
       def raw_attr_type(attr_name)
         schema['properties'][attr_name]['type'] if schema['properties'][attr_name]

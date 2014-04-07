@@ -146,6 +146,29 @@ describe Datanet::Skel::EntityDecorator do
       app('with_file').add(valid_entity, file_transmition).should == new_entity_id
     end
 
+    it 'sanitize file name' do
+      valid_entity = {'first_name' => 'marek'}
+      payload = double
+      files = { 'avatar' => { :filename => "marek\nphoto.jpg", :payload_stream => payload }}
+      file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
+      file_path = "/some/path/on/sftp"
+      allow(file_storage).to receive(:generate_path).and_return(file_path)
+      allow(file_storage).to receive(:store_payload).with(kind_of(GP::Proxy), payload, file_path).and_return(file_path)
+      file_collection = double
+      allow(mapper_decorator).to receive(:collection).with('file').and_return(file_collection)
+      new_entity_id = "id_123"
+      allow(entity).to receive(:add).with(valid_entity, {'attachment_id'=>'file'}).and_return(new_entity_id)
+      file_id = "filei123"
+      added_file_name = nil
+      allow(file_collection).to receive(:add) do |params|
+        added_file_name = params['file_name']
+      end.and_return(file_id)
+
+      app('with_file').add(valid_entity, file_transmition)
+
+      expect(added_file_name).to eq 'marek_photo.jpg'
+    end
+
     it 'adds one file succesfully but fails on adding second' do
       valid_entity = {'first_name' => 'marek', 'avatar2' => 'this_is_a_cause_of_failure' }
 
