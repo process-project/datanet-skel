@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Datanet::Skel::GridProxyAuth do
   include ProxyHelper
 
-  subject { Datanet::Skel::GridProxyAuth.new ca_payload }
+  subject { Datanet::Skel::GridProxyAuth.new(ca_payload) }
 
   describe '#authenticate' do
     before do

@@ -1,6 +1,6 @@
 GIT
   remote: git@dev.cyfronet.pl:commons/grid-proxy.git
-  revision: c009a8c9697c55fe0c800375c866a61f6f3d39b6
+  revision: c7cefc2a8d2e2dec07de9b73bafbcff0e3a2c35d
   specs:
     grid-proxy (0.0.1)
 
