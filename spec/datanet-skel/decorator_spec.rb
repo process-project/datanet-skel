@@ -22,7 +22,7 @@ describe Datanet::Skel::MapperDecorator do
     it 'lists registered collections' do
       @model_location = models_dir
 
-      app.collections.should == ['address', 'book', 'user', 'with_file']
+      app.collections.should == ['address', 'book', 'user', 'with_file', 'with_files']
     end
 
     it 'raises exception while model directory does not exist' do
@@ -108,7 +108,10 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').add(not_valid_user)
-      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/' did not contain a required property of 'last_name'")
+      }.to raise_error do |error|
+        expect(error).to be_a Datanet::Skel::ValidationError
+        expect(error.message).to include "The property '#/' did not contain a required property of 'last_name'"
+      end
     end
 
     it 'throws exception when adding a file together with metadata file reference attribute' do
@@ -119,7 +122,10 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('with_file').add(valid_entity, file_transmition)
-      }.to raise_error(Datanet::Skel::ValidationError, 'File upload conflicts with metadata attribute \'avatar\'')
+      }.to raise_error do |error|
+        expect(error).to be_a Datanet::Skel::ValidationError
+        expect(error.message).to include 'File upload conflicts with metadata attribute \'avatar\''
+      end
     end
 
     it 'adds valid entity with files' do
@@ -227,7 +233,10 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').replace(user_id, not_valid_updated_user)
-      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/' did not contain a required property of 'last_name'")
+      }.to raise_error do |error|
+        expect(error).to be_a Datanet::Skel::ValidationError
+        expect(error.message).to include "The property '#/' did not contain a required property of 'last_name'"
+      end
     end
 
     it 'throws exception while entity not found exception' do
@@ -276,7 +285,10 @@ describe Datanet::Skel::EntityDecorator do
 
       expect {
         app('user').update(user_id, wrong_updated_values)
-      }.to raise_error(Datanet::Skel::ValidationError, "The property '#/first_name' of type null did not match the following type: string")
+      }.to raise_error do |error|
+        expect(error).to be_a Datanet::Skel::ValidationError
+        expect(error.message).to include "The property '#/first_name' of type null did not match the following type: string"
+      end
     end
   end
 

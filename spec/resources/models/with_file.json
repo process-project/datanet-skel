@@ -1,8 +1,9 @@
 {
     "type": "object",
+    "required": ["first_name"],
     "properties": {
-        "first_name": {"type": "string", "required": true},
-        "attachment_id"    : {"type": "string", "required": false}
+        "first_name": {"type": "string"},
+        "attachment_id"    : {"type": "string"}
     },
 
     "links": [

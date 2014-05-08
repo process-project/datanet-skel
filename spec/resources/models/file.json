@@ -1,7 +1,8 @@
 {
     "type": "object",
+    "required": ["file_name", "file_path"],
     "properties": {
-        "file_name" : {"type": "string", "required": true},
-        "file_path" : {"type": "string", "required": true}
+        "file_name" : {"type": "string"},
+        "file_path" : {"type": "string"}
     }
 }

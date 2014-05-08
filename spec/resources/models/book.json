@@ -1,12 +1,13 @@
 {
   "type": "object",
+  "required": ["title", "authId", "blurb"],
   "properties": {
-    "title": { "type":"string", "required": true },
-    "authId": { "type":"string", "required": true },
+    "title": { "type":"string" },
+    "authId": { "type":"string" },
     "publisherId": { "type":"string" },
-    "blurb": { "type":"string", "required": true },
-    "tags": { "type":"array", "required": false },
-    "published": { "type":"boolean", "required": false }
+    "blurb": { "type":"string" },
+    "tags": { "type":"array" },
+    "published": { "type":"boolean" }
   },
 
   "links": [

@@ -20,7 +20,7 @@ Gem::Specification.new do |gem|
   gem.add_runtime_dependency 'grape', '0.6.0'
   gem.add_runtime_dependency 'sinatra'
   gem.add_runtime_dependency 'json'
-  gem.add_runtime_dependency 'json-schema'
+  gem.add_runtime_dependency 'json-schema', '~> 2.2.1'
   gem.add_runtime_dependency 'settingslogic'
   gem.add_runtime_dependency 'rack-stream'
 

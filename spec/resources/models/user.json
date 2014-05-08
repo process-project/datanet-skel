@@ -1,11 +1,12 @@
 {
   "type": "object",
+  "required": ["first_name", "last_name", "age"],
   "properties": {
-    "first_name": {"type": "string",  "required": true},
-    "last_name" : {"type": "string",  "required": true},
-    "age"       : {"type": "integer", "required": true},
-    "weight"    : {"type": "number",  "required": false},
-    "tags"      : {"type": "array",   "required": false, "items":{"type":"string"}},
-    "nrs"      : {"type": "array",   "required": false, "items":{"type":"integer"}}
+    "first_name": {"type": "string"},
+    "last_name" : {"type": "string"},
+    "age"       : {"type": "integer"},
+    "weight"    : {"type": "number"},
+    "tags"      : {"type": "array", "items":{"type":"string"}},
+    "nrs"       : {"type": "array", "items":{"type":"integer"}}
   }
 }
