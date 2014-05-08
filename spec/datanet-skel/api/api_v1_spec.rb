@@ -362,14 +362,14 @@ describe Datanet::Skel::API_v1 do
 
 	describe 'DELETE /:collection_name/:id' do
 		it 'deletes existing user entity' do
-			expect(@user_collection).to receive(:remove).with(user_id)
+			expect(@user_collection).to receive(:remove).with(user_id, proxy_payload)
 
 			delete "user/#{user_id}", nil, headers
 			expect(last_response.status).to eq 200
 		end
 
 		it 'deletes non existing user entity' do
-			expect(@user_collection).to receive(:remove).with(user_id)
+			expect(@user_collection).to receive(:remove).with(user_id, proxy_payload)
 				.and_raise(entity_not_found_error(user_id))
 
 			delete "user/#{user_id}", nil, headers

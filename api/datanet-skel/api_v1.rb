@@ -232,7 +232,7 @@ module Datanet
           requires :id, :desc => "Entity id"
         end
         delete ":collection_name/:id" do
-          collection.remove id
+          collection.remove(id, user_proxy)
           {}
         end
 

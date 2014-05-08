@@ -329,4 +329,64 @@ describe Datanet::Skel::EntityDecorator do
       expect(attr_type).to eq :boolean
     end
   end
+
+  describe 'delete entity' do
+    let(:file_collection) { double('file collection') }
+
+    before do
+      allow(mapper_decorator)
+        .to receive(:collection)
+          .with('file').and_return(file_collection)
+    end
+
+    it 'deletes entity without file reference' do
+      id = 'entity_id'
+      allow(entity).to receive(:get).and_return({})
+      expect(entity).to receive(:remove).with(id, 'proxy')
+
+      app('user').remove(id, 'proxy')
+    end
+
+    it 'deletes entity with single file reference' do
+      id = 'entity_id'
+      file_id = 'file_id'
+      allow(entity).to receive(:get).and_return({
+        'first_name' => 'not important',
+        'attachment_id' => file_id
+      })
+
+      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(file_collection).to receive(:remove).with(file_id, 'proxy')
+
+      app('with_file').remove(id, 'proxy')
+    end
+
+    it 'deletes only entity when file reference is empty' do
+      id = 'entity_id'
+      file_id = 'file_id'
+      allow(entity).to receive(:get).and_return({
+        'first_name' => 'not important'
+      })
+
+      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(file_collection).not_to receive(:remove)
+
+      app('with_file').remove(id, 'proxy')
+    end
+
+    it 'deletes entity with files array references' do
+      id = 'entity_id'
+      file1_id = 'file1_id'
+      file2_id = 'file2_id'
+      allow(entity).to receive(:get).and_return({
+        'first_name' => 'not important',
+        'attachment_ids' => [file1_id, file2_id]
+      })
+      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(file_collection).to receive(:remove).with(file1_id, 'proxy')
+      expect(file_collection).to receive(:remove).with(file2_id, 'proxy')
+
+      app('with_files').remove(id, 'proxy')
+    end
+  end
 end

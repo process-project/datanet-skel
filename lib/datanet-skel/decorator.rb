@@ -137,6 +137,13 @@ module Datanet
         super(id, json_doc, @inspector.relations)
       end
 
+      def remove(id, proxy)
+        entity = get(id)
+        remove_dependencies(entity, proxy)
+
+        super
+      end
+
       def schema
         JSON.parse(File.read(@model_path))
       end
@@ -154,7 +161,23 @@ module Datanet
         raw_type ? ATTR_TYPES_MAP[raw_type] : nil
       end
 
+    protected
+
+      def remove_dependencies(entity, proxy)
+        @inspector.relations.each do |k, v|
+          remove_file([entity[k]].flatten, proxy) if v == 'file'
+        end
+      end
+
     private
+
+      def remove_file(ids, proxy)
+        ids.each do |id|
+          @decorated_mapper
+            .collection('file')
+              .remove(id, proxy) if id
+        end
+      end
 
       def sanitize_filename(filename)
         filename.gsub("\n", '_')
@@ -185,7 +208,12 @@ module Datanet
         proxy = GP::Proxy.new proxy_payload
         @file_storage.get_file(proxy, file_entity['file_path'], &block)
       end
-    end
 
+      protected
+
+        def remove_dependencies(entity, proxy)
+          @file_storage.delete_file(proxy, entity['file_path'])
+        end
+    end
   end
 end
