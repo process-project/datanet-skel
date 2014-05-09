@@ -212,7 +212,10 @@ module Datanet
       protected
 
         def remove_dependencies(entity, proxy)
-          @file_storage.delete_file(proxy, entity['file_path'])
+          @file_storage.delete_file(
+              GP::Proxy.new(proxy),
+              entity['file_path']
+            )
         end
     end
   end
