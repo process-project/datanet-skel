@@ -141,7 +141,7 @@ module Datanet
         entity = get(id)
         remove_dependencies(entity, proxy)
 
-        super
+        super(id)
       end
 
       def schema
