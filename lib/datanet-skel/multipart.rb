@@ -49,7 +49,7 @@ module Datanet
 
       def set_field key, value
         raise "Multiple specification of the property #{key} " unless @fields[key].nil?
-        @fields[key] = value
+        @fields[key] = value.force_encoding('utf-8')
       end
 
       def set_metadata metadata
