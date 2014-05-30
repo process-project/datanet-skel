@@ -342,7 +342,7 @@ describe Datanet::Skel::EntityDecorator do
     it 'deletes entity without file reference' do
       id = 'entity_id'
       allow(entity).to receive(:get).and_return({})
-      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(entity).to receive(:remove).with(id)
 
       app('user').remove(id, 'proxy')
     end
@@ -355,7 +355,7 @@ describe Datanet::Skel::EntityDecorator do
         'attachment_id' => file_id
       })
 
-      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(entity).to receive(:remove).with(id)
       expect(file_collection).to receive(:remove).with(file_id, 'proxy')
 
       app('with_file').remove(id, 'proxy')
@@ -368,7 +368,7 @@ describe Datanet::Skel::EntityDecorator do
         'first_name' => 'not important'
       })
 
-      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(entity).to receive(:remove).with(id)
       expect(file_collection).not_to receive(:remove)
 
       app('with_file').remove(id, 'proxy')
@@ -382,7 +382,7 @@ describe Datanet::Skel::EntityDecorator do
         'first_name' => 'not important',
         'attachment_ids' => [file1_id, file2_id]
       })
-      expect(entity).to receive(:remove).with(id, 'proxy')
+      expect(entity).to receive(:remove).with(id)
       expect(file_collection).to receive(:remove).with(file1_id, 'proxy')
       expect(file_collection).to receive(:remove).with(file2_id, 'proxy')
 
