@@ -119,14 +119,16 @@ module Datanet
             end
           end
 
-          valid! json_doc
+          sanitize_arrays!(json_doc)
+          valid!(json_doc)
           super(json_doc, @inspector.relations)
         end
 
       end
 
       def replace(id, json_doc)
-        valid! json_doc
+        sanitize_arrays!(json_doc)
+        valid!(json_doc)
         super(id, json_doc, @inspector.relations)
       end
 
@@ -196,6 +198,11 @@ module Datanet
         end
       end
 
+      def sanitize_arrays!(json_doc)
+        json_doc.reject! do |k, v|
+          attr_type(k) == :array && (v == nil || v = '')
+        end
+      end
     end
 
     class FileEntityDecorator < EntityDecorator

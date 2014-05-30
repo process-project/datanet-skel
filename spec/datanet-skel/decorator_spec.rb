@@ -103,6 +103,22 @@ describe Datanet::Skel::EntityDecorator do
       app('book').add(new_book).should == new_book_id
     end
 
+    it 'removes empty array from json', focus: true do
+      new_user = {
+        'first_name' => 'marek',
+        'last_name' => 'k',
+        'age' => 2,
+        'tags' => nil,
+        'nrs' => ''
+      }
+
+      expect(entity).to receive(:add)
+        .with({'first_name' => 'marek', 'last_name' => 'k', 'age' => 2}, {})
+          .and_return('123')
+
+       app('user').add(new_user)
+    end
+
     it 'throws exception when json is not valid according to given schema' do
       not_valid_user = {'first_name' => 'marek', 'age' => 31, 'other' => 'something else'}
 
