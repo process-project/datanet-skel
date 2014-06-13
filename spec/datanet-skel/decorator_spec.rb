@@ -103,7 +103,7 @@ describe Datanet::Skel::EntityDecorator do
       app('book').add(new_book).should == new_book_id
     end
 
-    it 'removes empty array from json', focus: true do
+    it 'removes empty array from json' do
       new_user = {
         'first_name' => 'marek',
         'last_name' => 'k',
@@ -131,8 +131,8 @@ describe Datanet::Skel::EntityDecorator do
     end
 
     it 'throws exception when adding a file together with metadata file reference attribute' do
-      valid_entity = {'first_name' => 'marek', 'avatar' => 'this_is_a_cause_of_failure' }
-      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload => '' }}
+      valid_entity = {'first_name' => 'marek', 'attachment_id' => 'this_is_a_cause_of_failure' }
+      files = { 'attachment_id' => { :filename => 'marek_photo.jpg', :payload => '' }}
 
       file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
 
@@ -140,7 +140,7 @@ describe Datanet::Skel::EntityDecorator do
         app('with_file').add(valid_entity, file_transmition)
       }.to raise_error do |error|
         expect(error).to be_a Datanet::Skel::ValidationError
-        expect(error.message).to include 'File upload conflicts with metadata attribute \'avatar\''
+        expect(error.message).to include 'File upload conflicts with metadata attribute \'attachment_id\''
       end
     end
 
@@ -149,7 +149,7 @@ describe Datanet::Skel::EntityDecorator do
 
       payload = double
 
-      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload }}
+      files = { 'attachment_id' => { :filename => 'marek_photo.jpg', :payload_stream => payload }}
       file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
 
       file_path = "/some/path/on/sftp"
@@ -168,10 +168,30 @@ describe Datanet::Skel::EntityDecorator do
       app('with_file').add(valid_entity, file_transmition).should == new_entity_id
     end
 
+    it 'throws exception when user tried to add file using non file field' do
+      payload = double
+
+      files = {
+        'first_name' => {
+          :filename => 'marek_photo.jpg',
+          :payload_stream => payload
+        },
+        'attachment_id' => {
+          :filename => 'marek_photo.jpg',
+          :payload_stream => payload
+        }
+      }
+      file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
+
+      expect {
+        app('with_file').add({}, file_transmition)
+        }.to raise_error(Datanet::Skel::ValidationError, 'Cannot upload file for first_name. This attribure is not a file.')
+    end
+
     it 'sanitize file name' do
       valid_entity = {'first_name' => 'marek'}
       payload = double
-      files = { 'avatar' => { :filename => "marek\nphoto.jpg", :payload_stream => payload }}
+      files = { 'attachment_id' => { :filename => "marek\nphoto.jpg", :payload_stream => payload }}
       file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)
       file_path = "/some/path/on/sftp"
       allow(file_storage).to receive(:generate_path).and_return(file_path)
@@ -196,7 +216,7 @@ describe Datanet::Skel::EntityDecorator do
 
       payload = double
 
-      files = { 'avatar' => { :filename => 'marek_photo.jpg', :payload_stream => payload },
+      files = { 'attachment_id' => { :filename => 'marek_photo.jpg', :payload_stream => payload },
        'avatar2' => { :filename => 'marek_photo2.jpg', :payload_stream => payload }
       }
       file_transmition = Datanet::Skel::FileTransmition.new(proxy_payload, files)

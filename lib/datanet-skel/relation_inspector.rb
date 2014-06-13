@@ -9,6 +9,9 @@ module Datanet
         find_relations
       end
 
+      def file?(attr_name)
+        relations[attr_name] == 'file'
+      end
     private
 
       def find_relations
@@ -20,10 +23,10 @@ module Datanet
       end
 
       def check_and_add_relation(link)
-        @model['properties'].each_key {|k|
+        @model['properties'].each_key do |k|
           @relations[k] = link['targetSchema'] if
             link['href'].include?("{#{k}}")
-        }
+        end
       end
     end
   end

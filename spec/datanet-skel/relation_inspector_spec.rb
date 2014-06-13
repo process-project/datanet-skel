@@ -19,4 +19,9 @@ describe Datanet::Skel::RelationInspector do
       inspector('address').relations.should == {}
     end
   end
+
+  it 'checks for file relation' do
+    expect(inspector('with_file').file?('avatar')).to be_true
+    expect(inspector('with_file').file?('first_name')).to be_false
+  end
 end

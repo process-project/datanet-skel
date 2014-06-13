@@ -77,6 +77,10 @@ module Datanet
                 raise Datanet::Skel::ValidationError, "File upload conflicts with metadata attribute \'#{attr_name}\'"
               end
 
+              unless @inspector.file?(attr_name)
+                raise Datanet::Skel::ValidationError, "Cannot upload file for #{attr_name}. This attribure is not a file."
+              end
+
               file_upload = Class.new(Datanet::Skel::AtomicAction) do
                 def initialize(transaction, file_storage, proxy, payload_stream)
                   @file_storage = file_storage
