@@ -204,7 +204,7 @@ module Datanet
 
       def sanitize_arrays!(json_doc)
         json_doc.reject! do |k, v|
-          attr_type(k) == :array && (v == nil || v = '')
+          attr_type(k) == :array && (v == nil || v == '')
         end
       end
     end
