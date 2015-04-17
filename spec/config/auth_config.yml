@@ -1,2 +1,5 @@
-repository_type: private
-owners: ['marek', 'daniel']
+---
+other_prop: value
+owners:
+- marek
+- daniel
