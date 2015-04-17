@@ -118,8 +118,12 @@ module Datanet
           Datanet::Skel::FileTransmition.new(user_proxy, form_data.files) if form_data && form_data.files
         end
 
+        def username
+          API.auth.username(user_proxy)
+        end
+
         def collection
-          mapper.collection(params[:collection_name])
+          mapper.collection(params[:collection_name], username)
         end
 
         def entity!

@@ -43,12 +43,25 @@ describe Datanet::Skel::API_v1 do
   let(:file_collection) { double('file collection') }
 
   before(:each) do
+    allow(Datanet::Skel::API).
+      to receive(:auth).
+      and_return(double(authenticate: true,
+                        authenticate!: true,
+                        authorize!: true,
+                        username: 'marek'))
+
 		@user_collection = double(Datanet::Skel::CollectionMock)
 		@mapper = double(Datanet::Skel::MapperMock)
-		allow(@mapper).to receive(:collection).with('user')
-			.and_return(@user_collection)
-    allow(@mapper).to receive(:collection).with('file')
-      .and_return(file_collection)
+
+		allow(@mapper).
+      to receive(:collection).
+      with('user', 'marek').
+      and_return(@user_collection)
+
+    allow(@mapper).
+      to receive(:collection).
+      with('file', 'marek').
+      and_return(file_collection)
 
 		Datanet::Skel::API.mapper = @mapper
 	end
@@ -74,8 +87,10 @@ describe Datanet::Skel::API_v1 do
 
 	describe 'GET :collection_name' do
 		it 'gets non existing collection' do
-			expect(@mapper).to receive(:collection).with('non_existing')
-			 	.and_raise(Datanet::Skel::CollectionNotFoundException.new)
+			expect(@mapper).
+        to receive(:collection).
+        with('non_existing', 'marek').
+        and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
   			get 'non_existing', nil, headers
   			expect(last_response.status).to eq 404
@@ -449,7 +464,10 @@ describe Datanet::Skel::API_v1 do
 			expect(json_response).to eq schema
 		end
 		it 'return 404 when schema is not found' do
-			expect(@mapper).to receive(:collection).with('non_existing').and_raise(Datanet::Skel::CollectionNotFoundException.new)
+			expect(@mapper).
+        to receive(:collection).
+        with('non_existing', 'marek').
+        and_raise(Datanet::Skel::CollectionNotFoundException.new)
 
 			get 'non_existing.schema', nil, headers
 			expect(last_response.status).to eq 404
