@@ -24,8 +24,7 @@ module Datanet
 
       def check_and_add_relation(link)
         @model['properties'].each_key do |k|
-          @relations[k] = link['targetSchema'] if
-            link['href'].include?("{#{k}}")
+          @relations[k] = link['targetSchema'] if link['href'].include?("{#{k}}")
         end
       end
     end

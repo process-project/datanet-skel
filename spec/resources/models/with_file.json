@@ -1,17 +1,18 @@
 {
-    "type": "object",
-    "required": ["first_name"],
-    "properties": {
-        "first_name": {"type": "string"},
-        "attachment_id"    : {"type": "string"}
-    },
+  "type": "object",
+  "required": ["first_name"],
+  "properties": {
+    "first_name": {"type": "string"},
+    "attachment_id": {"type": "string"}
+  },
 
-    "links": [
-        { "rel" :"attachment",
-            "href":"/entity/file/{attachment_id}",
-            "targetSchema":"file"
-        }
-    ]
+  "links": [
+    {
+      "rel" :"attachment",
+      "href":"/entity/file/{attachment_id}",
+      "targetSchema":"file"
+    }
+  ]
 }
 
 

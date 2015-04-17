@@ -21,7 +21,7 @@ describe Datanet::Skel::RelationInspector do
   end
 
   it 'checks for file relation' do
-    expect(inspector('with_file').file?('avatar')).to be_true
+    expect(inspector('with_file').file?('attachment_id')).to be_true
     expect(inspector('with_file').file?('first_name')).to be_false
   end
 end
