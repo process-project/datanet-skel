@@ -29,6 +29,7 @@ module Datanet
           API.auth.repository_type = attrs[:repository_type].to_sym if attrs[:repository_type]
           API.auth.owners = attrs[:owners] if attrs[:owners]
           API.auth.cors_origins = attrs[:cors_origins] if attrs[:cors_origins]
+          API.auth.data_separation = params[:data_separation] if params[:data_separation] != nil
           API.auth.configuration
         end
       end

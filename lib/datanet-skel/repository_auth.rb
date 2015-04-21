@@ -33,6 +33,10 @@ module Datanet
         update_cors if cors
       end
 
+      def data_separation=(data_separation)
+        update_settings("data_separation", !!data_separation) if da
+      end
+
       def cors_origins
         settings['cors_origins'] || []
       end
