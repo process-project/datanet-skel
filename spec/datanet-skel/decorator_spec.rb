@@ -45,17 +45,18 @@ describe Datanet::Skel::MapperDecorator do
   describe 'collection method' do
     it 'get existing collection' do
       @model_location = models_dir
-      mapper.should_receive(:collection).with(any_args())
+      mapper.should_receive(:collection).with(any_args(), any_args())
           .and_return(Object.new)
 
-      app.collection('user').should be_an_instance_of(Datanet::Skel::EntityDecorator)
+      app.collection('user', 'marek').
+        should be_an_instance_of(Datanet::Skel::EntityDecorator)
     end
 
     it 'throws exception while getting non existing collection' do
       @model_location = models_dir
 
       expect {
-        app.collection('not_existing')
+        app.collection('not_existing', 'marek')
       }.to raise_error(Datanet::Skel::CollectionNotFoundException, 'Entity not_existing not found')
     end
   end

@@ -1,13 +1,14 @@
 module Datanet
-module Skel
-  class CollectionNotFoundException < Exception; end
-  class EntityNotFoundException < Exception; end
-  class EntityAttributeNotFoundException < Exception; end
-  class ValidationError < Exception; end
-  class WrongModelLocationError < Exception; end
-  class FileStorageException < Exception; end
+  module Skel
+    class CollectionNotFoundException < StandardError; end
+    class EntityNotFoundException < StandardError; end
+    class EntityAttributeNotFoundException < StandardError; end
+    class ValidationError < StandardError; end
+    class WrongModelLocationError < StandardError; end
+    class FileStorageException < StandardError; end
 
-  class Unauthenticated < Exception; end
-  class Unauthorized < Exception; end
-end
+    class Unauthenticated < StandardError; end
+    class Unauthorized < StandardError; end
+    class PermissionDenied < StandardError; end
+  end
 end

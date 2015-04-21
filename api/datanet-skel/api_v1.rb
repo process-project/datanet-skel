@@ -49,6 +49,10 @@ module Datanet
         rack_response({:message => e.message}.to_json, 403)
       end
 
+      rescue_from Datanet::Skel::PermissionDenied do |e|
+        rack_response({:message => e.message}.to_json, 403)
+      end
+
       rescue_from Exception do |e|
         rack_response({:message => 'Internal application error, please contact Datanet administrator'}.to_json, 500)
       end

@@ -33,7 +33,7 @@ module Datanet
         @file_storage ||= Datanet::Skel::FileStorage.new
       end
 
-      def collection(entity_type)
+      def collection(entity_type, username)
         path = entity_path!(entity_type)
         if entity_type == 'file'
           FileEntityDecorator.new(super, path, file_storage, self)

@@ -13,7 +13,7 @@ module Datanet
       end
 
       def authorized?(creds)
-        public? || owner?(authenticator.username(creds))
+        public? || owner?(username(creds))
       end
 
       def admin?(token)
@@ -39,6 +39,10 @@ module Datanet
 
       def configuration
         YAML.load_file settings.config_file
+      end
+
+      def username(creds)
+        authenticator.username(creds)
       end
 
       private
