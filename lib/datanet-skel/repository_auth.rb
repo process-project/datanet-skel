@@ -34,7 +34,7 @@ module Datanet
       end
 
       def data_separation=(data_separation)
-        update_settings("data_separation", !!data_separation) if data_separation
+        update_settings("data_separation", !!data_separation)
       end
 
       def cors_origins
